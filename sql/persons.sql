@@ -30,7 +30,6 @@ CREATE TABLE `persons` (
   `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '密码',
   `avatar` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '头像',
   `status` tinyint(4) NOT NULL DEFAULT '1' COMMENT '状态:1=正常,2=禁用',
-  `creator_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '创建人ID',
   `created_at` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
   `updated_at` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间',
   `deleted_at` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '软删除',
