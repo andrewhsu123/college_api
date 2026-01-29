@@ -21,11 +21,11 @@ SET FOREIGN_KEY_CHECKS=0;
 DROP TABLE IF EXISTS `staff`;
 CREATE TABLE `staff` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `person_id` int(10) unsigned NOT NULL COMMENT '关联人员ID',
-  `name` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '姓名(冗余字段)',
-  `staff_no` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '工号',
-  `department_id` int(10) unsigned DEFAULT NULL COMMENT '所属部门ID(关联departments表)',
   `university_id` int(10) unsigned NOT NULL COMMENT '高校ID(关联customers表)',
+  `person_id` int(10) unsigned NOT NULL COMMENT '关联人员ID',
+  `staff_no` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '工号',
+  `name` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '姓名(冗余字段)',
+  `department_id` int(10) unsigned DEFAULT NULL COMMENT '所属部门ID(关联departments表)',
   `college_id` int(10) unsigned DEFAULT NULL COMMENT '所属学院ID(关联departments表)',
   `faculty_id` int(10) unsigned DEFAULT NULL COMMENT '所属系ID(关联departments表)',
   `created_at` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
