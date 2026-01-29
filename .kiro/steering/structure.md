@@ -1,74 +1,132 @@
 # 项目结构
 
-## 文档组织
+## 当前项目组织
 
-所有文档按服务和类别组织在 `docs/` 目录中：
+这是一个基于 Go 的人员中心服务中台项目，采用标准 Go 项目布局。
 
-### 服务文档 (`docs/services/`)
-
-每个微服务都有自己的文档文件：
-
-- **PersonService.md** - 人员管理服务（CRUD、搜索、角色管理）
-- **DepartmentService.md** - 组织/部门服务（树查询、嵌套集合）
-- **RoleService.md** - 角色管理服务（基于JSON的权限范围）
-- **PermissionService.md** - 权限计算和验证服务
-- **SearchService.md** - 基于ElasticSearch的搜索服务
-- **StudentService.md** - 学生特定操作
-- **StaffService.md** - 员工特定操作
-
-### 架构文档 (`docs/architecture/`)
-
-系统级架构和设计：
-
-- **overview.md** - 整体系统架构、微服务设计、数据流
-- **caching.md** - Redis缓存策略、缓存失效、多层缓存
-- **performance.md** - 性能目标、优化技术、负载测试
-
-### 数据库文档 (`docs/database/`)
-
-数据库模式和优化：
-
-- **schema.md** - 表结构、关系、索引策略
-
-### 部署文档 (`docs/deployment/`)
-
-实施和运维：
-
-- **implementation-plan.md** - 7周分阶段实施计划
-- **risks.md** - 风险评估和缓解策略
-
-### API文档 (`docs/api/`)
-
-每个服务的API规范（当前为空，待填充）
-
-## 代码组织
+### 根目录结构
 
 ```
 .
-├── docs/                    # 所有文档
-│   ├── services/           # 服务特定文档
-│   ├── architecture/       # 系统架构
-│   ├── database/           # 数据库模式
-│   ├── deployment/         # 实施计划
-│   └── api/               # API规范
-├── .kiro/                  # Kiro配置
-│   └── steering/          # 规则指引
-├── *.sql                   # 数据库模式文件
-├── main.go                 # 应用程序入口
-└── README.md              # 项目概述
-
+├── cmd/                    # 应用程序入口（待创建）
+├── internal/              # 私有应用代码（待创建）
+│   ├── handler/          # HTTP处理器
+│   ├── service/          # 业务逻辑
+│   ├── repository/       # 数据访问层
+│   ├── model/            # 数据模型
+│   └── middleware/       # 中间件
+├── pkg/                   # 可复用的公共库（待创建）
+├── config/                # 配置文件（待创建）
+├── develop/               # 📚 开发参考资料（只读）
+│   ├── docs/             # 设计文档和方案
+│   └── sql/              # 数据库表结构参考
+├── .kiro/                 # Kiro配置
+│   └── steering/         # 开发规则指引
+├── main.go                # 当前应用入口
+├── go.mod                 # Go模块定义
+└── README.md             # 项目说明
 ```
 
-## 在此项目上工作时
+### develop/ 文件夹说明（参考资料）
 
-1. **添加新服务**：在 `docs/services/[ServiceName].md` 中创建文档
-2. **修改架构**：更新 `docs/architecture/` 中的相关文件
-3. **数据库变更**：更新 `docs/database/schema.md` 并创建迁移SQL文件
-4. **API变更**：在 `docs/api/[ServiceName].md` 中记录
+**重要：develop/ 文件夹是只读参考资料，不能直接使用其中的代码**
+
+#### 文档资料 (`develop/docs/`)
+
+- **人员中心服务中台方案.md** - 完整技术方案
+- **项目完成计划表.md** - 实施计划
+- **services/** - 各微服务设计文档
+  - PersonService.md, DepartmentService.md, RoleService.md 等
+- **architecture/** - 架构设计文档
+  - overview.md, caching.md, performance.md
+- **database/** - 数据库设计文档
+  - schema.md
+- **deployment/** - 部署文档
+  - implementation-plan.md, risks.md
+
+#### 数据库参考 (`develop/sql/`)
+
+- departments.sql - 机构表结构
+- persons.sql - 人员基础表
+- persons_roles.sql - 角色表
+- persons_has_roles.sql - 用户角色关联表
+- role_has_departments.sql - 角色机构关联表
+- students.sql - 学生表
+- staff.sql - 政工表
+
+### 实际开发目录（待创建）
+
+当开始实际开发时，应创建以下标准 Go 项目结构：
+
+```
+cmd/
+  └── server/
+      └── main.go          # 服务启动入口
+
+internal/
+  ├── handler/             # HTTP处理器
+  │   ├── person.go
+  │   ├── department.go
+  │   └── role.go
+  ├── service/             # 业务逻辑层
+  │   ├── person_service.go
+  │   ├── department_service.go
+  │   └── role_service.go
+  ├── repository/          # 数据访问层
+  │   ├── person_repo.go
+  │   └── department_repo.go
+  ├── model/               # 数据模型
+  │   ├── person.go
+  │   ├── department.go
+  │   └── role.go
+  └── middleware/          # 中间件
+      ├── auth.go
+      └── logger.go
+
+pkg/
+  ├── cache/               # 缓存工具
+  ├── database/            # 数据库工具
+  └── response/            # 响应封装
+
+config/
+  └── config.yaml          # 配置文件
+```
+
+## 开发工作流程
+
+### 1. 查阅参考资料
+- 从 `develop/docs/` 查看设计文档
+- 从 `develop/sql/` 查看数据库表结构
+- **不要直接修改或使用 develop/ 中的文件**
+
+### 2. 创建实际代码
+- 在项目根目录创建标准 Go 项目结构
+- 参考 develop/ 中的设计，但需要重新编写代码
+- 遵循 tech.md 中的编码规范
+
+### 3. 数据库脚本
+- 可以从 `develop/sql/` 复制表结构
+- 在项目根目录或 `sql/` 目录创建实际使用的脚本
+- 根据需要添加优化和索引
 
 ## 关键原则
 
-- 保持服务文档专注于该服务的职责
-- 交叉引用相关服务而不是重复信息
-- 进行系统级更改时更新架构文档
-- 业务上下文使用中文文档，技术结构使用英文
+1. **develop/ 是参考资料库**
+   - 只读，不修改
+   - 查阅设计和方案
+   - 理解业务逻辑
+
+2. **实际代码在项目根目录**
+   - 遵循标准 Go 项目布局
+   - 代码需要重新编写，不能直接复制
+   - 保持代码简洁和可维护
+
+3. **文档和代码分离**
+   - 设计文档在 develop/docs/
+   - 实际代码在 internal/, cmd/, pkg/
+   - README.md 保持简洁，指向详细文档
+
+4. **中文业务，英文代码**
+   - 业务文档使用中文
+   - 代码、注释、变量名使用英文
+   - 用户界面文本使用中文
