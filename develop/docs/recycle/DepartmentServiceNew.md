@@ -1,11 +1,34 @@
 # 获取登录信息
+
+## 学校登录
 127.0.0.1:8081/api/base/info
 Authorization:Bearer 111|cxlho8PuMFjSqUQmWiecuhG2cc3YdVUZ0TK9xF4568f3b872
 
-# 获取学校信息
+## 政工登录
+127.0.0.1:8081/api/staff/info
+Authorization:Bearer 112|au4XBYmV0w8IjGD0KviuLsv4X1oBHyJ1LPAXdpIM259050c6
+
+# 获取信息
+
+## 学校信息
 登录后得到学校用户id  即  (user_id=1)
 根据user_id 可以得到学校id 即 (customer_id=1)
 select customer_id from admin_users where id=1;
+
+## 政工信息
+登录后得到政工人员id  即  (person_id=9)
+根据person_id 可以在persons表得到 即 (customer_id=1)
+select customer_id from persons where id=9;
+
+当前政工可见的部门id
+select department_ids 
+from persons_roles 
+where customer_id=1 and id in (select role_id from persons_has_roles where person_id=9)
+查询结果eg:
+```
+[55,64,56,61,20,46]
+[55]
+```
 
 # 获取组织机构
 树形的第一级为：学校
@@ -76,3 +99,8 @@ eg:
 机构服务提供两种查询
 1、查询树形服务
 2、机构名称模糊查询、机构类型department_type查询
+
+政工树形：
+根据政工组织机构id权限显示可见树形
+
+根据政工组织机构id权限显示搜索结果
