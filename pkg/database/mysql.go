@@ -39,9 +39,10 @@ func NewMySQLConnection(cfg Config) (*sql.DB, error) {
 	}
 
 	// 设置连接池参数
-	db.SetMaxOpenConns(100)
-	db.SetMaxIdleConns(10)
-	db.SetConnMaxLifetime(time.Hour)
+	db.SetMaxOpenConns(100)              // 最大打开连接数
+	db.SetMaxIdleConns(10)               // 最大空闲连接数
+	db.SetConnMaxLifetime(time.Hour)     // 连接最大生命周期
+	db.SetConnMaxIdleTime(10 * time.Minute) // 连接最大空闲时间
 
 	// 测试连接
 	if err := db.Ping(); err != nil {
