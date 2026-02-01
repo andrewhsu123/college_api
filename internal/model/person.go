@@ -81,8 +81,8 @@ type StaffInfo struct {
 type PersonListRequest struct {
 	UniversityID int  `form:"university_id" binding:"required"`
 	PersonType   int  `form:"person_type" binding:"required"`
-	Page         int  `form:"page" binding:"min=1"`
-	PageSize     int  `form:"page_size" binding:"min=1,max=100"`
+	Page         int  `form:"page"`
+	PageSize     int  `form:"page_size"`
 	WithExtend   bool `form:"with_extend"`
 
 	// persons表字段搜索
