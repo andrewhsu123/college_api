@@ -1,0 +1,729 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD><META content="IE=5.0000" http-equiv="X-UA-Compatible">
+<TITLE>数据字典</TITLE> 
+<META http-equiv="Content-Type" content="text/html; charset=utf-8">
+<STYLE>
+body,td,th {font-family:"宋体"; font-size:12px;}
+table{border-collapse:collapse;border:1px solid #CCC;background:#efefef;}
+table caption{text-align:left; background-color:#fff; line-height:2em; font-size:14px; font-weight:bold; }
+table th{text-align:left; font-weight:bold;height:26px; line-height:26px; font-size:12px; border:1px solid #CCC;}
+table td{height:20px; font-size:12px; border:1px solid #CCC;background-color:#fff;}
+.c1{ width: 120px;}
+.c2{ width: 120px;}
+.c3{ width: 70px;}
+.c4{ width: 80px;}
+.c5{ width: 80px;}
+.c6{ width: 270px;}
+</STYLE>
+</HEAD> 
+<BODY>
+<H1 style="text-align: center;">星塔校园 - 数据字典</H1>
+
+<TABLE align="center" border="1" cellspacing="0" cellpadding="0">
+  <CAPTION>persons 人员基础表</CAPTION>
+  <TBODY>
+  <TR>
+    <TH>字段名</TH>
+    <TH>数据类型</TH>
+    <TH>默认值</TH>
+    <TH>允许非空</TH>
+    <TH>自动递增</TH>
+    <TH>备注</TH></TR>
+  <TR>
+    <TD class="c1">id</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">&nbsp;</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">是</TD>
+    <TD class="c6">人员ID</TD></TR>
+  <TR>
+    <TD class="c1">customer_id</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">&nbsp;</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">客户ID(学校ID)</TD></TR>
+  <TR>
+    <TD class="c1">person_type</TD>
+    <TD class="c2">tinyint(4)</TD>
+    <TD class="c3">&nbsp;</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">人员类型:1=学生 2=政工 3=维修工</TD>
+  </TR>
+  <TR>
+    <TD class="c1">name</TD>
+    <TD class="c2">varchar(100)</TD>
+    <TD class="c3">&nbsp;</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">姓名</TD></TR>
+  <TR>
+    <TD class="c1">gender</TD>
+    <TD class="c2">tinyint(4)</TD>
+    <TD class="c3">NULL</TD>
+    <TD class="c4">YES</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">性别:1=男,2=女</TD></TR>
+  <TR>
+    <TD class="c1">mobile</TD>
+    <TD class="c2">varchar(30)</TD>
+    <TD class="c3">NULL</TD>
+    <TD class="c4">YES</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">手机号</TD></TR>
+  <TR>
+    <TD class="c1">email</TD>
+    <TD class="c2">varchar(100)</TD>
+    <TD class="c3">NULL</TD>
+    <TD class="c4">YES</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">电子邮箱</TD></TR>
+  <TR>
+    <TD class="c1">password</TD>
+    <TD class="c2">varchar(255)</TD>
+    <TD class="c3">&nbsp;</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">密码</TD></TR>
+  <TR>
+    <TD class="c1">avatar</TD>
+    <TD class="c2">varchar(500)</TD>
+    <TD class="c3">NULL</TD>
+    <TD class="c4">YES</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">头像</TD></TR>
+  <TR>
+    <TD class="c1">status</TD>
+    <TD class="c2">tinyint(4)</TD>
+    <TD class="c3">1</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">状态:1=正常,2=禁用</TD></TR>
+  <TR>
+    <TD class="c1">created_at</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">0</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">创建时间</TD></TR>
+  <TR>
+    <TD class="c1">updated_at</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">0</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">更新时间</TD></TR>
+  <TR>
+    <TD class="c1">deleted_at</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">0</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">软删除</TD></TR>
+  </TBODY></TABLE>
+
+<P></P>
+
+<TABLE align="center" border="1" cellspacing="0" cellpadding="0">
+  <CAPTION>departments 部门/机构表</CAPTION>
+  <TBODY>
+  <TR>
+    <TH>字段名</TH>
+    <TH>数据类型</TH>
+    <TH>默认值</TH>
+    <TH>允许非空</TH>
+    <TH>自动递增</TH>
+    <TH>备注</TH></TR>
+  <TR>
+    <TD class="c1">id</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">&nbsp;</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">是</TD>
+    <TD class="c6">&nbsp;</TD></TR>
+  <TR>
+    <TD class="c1">customer_id</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">0</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">客户ID(学校ID\tree_group)</TD></TR>
+  <TR>
+    <TD class="c1">parent_id</TD>
+    <TD class="c2">int(11)</TD>
+    <TD class="c3">0</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">父级ID</TD></TR>
+  <TR>
+    <TD class="c1">tree_level</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">NULL</TD>
+    <TD class="c4">YES</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">等级</TD></TR>
+  <TR>
+    <TD class="c1">tree_left</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">NULL</TD>
+    <TD class="c4">YES</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">左值（预排序遍历树）</TD></TR>
+  <TR>
+    <TD class="c1">tree_right</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">NULL</TD>
+    <TD class="c4">YES</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">右值（预排序遍历树）</TD></TR>
+  <TR>
+    <TD class="c1">recommend_num</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">0</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">真实的父级机构数</TD></TR>
+  <TR>
+    <TD class="c1">department_name</TD>
+    <TD class="c2">varchar(191)</TD>
+    <TD class="c3">&nbsp;</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">部门名称</TD></TR>
+  <TR>
+    <TD class="c1">department_type</TD>
+    <TD class="c2">tinyint(4)</TD>
+    <TD class="c3">1</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">机构类型:0=学校 1=行政机构 2=学院 3=系 4=专业 5=班级</TD></TR>
+  <TR>
+    <TD class="c1">principal</TD>
+    <TD class="c2">varchar(191)</TD>
+    <TD class="c3">NULL</TD>
+    <TD class="c4">YES</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">负责人</TD></TR>
+  <TR>
+    <TD class="c1">mobile</TD>
+    <TD class="c2">varchar(30)</TD>
+    <TD class="c3">NULL</TD>
+    <TD class="c4">YES</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">负责人联系方式</TD></TR>
+  <TR>
+    <TD class="c1">email</TD>
+    <TD class="c2">varchar(50)</TD>
+    <TD class="c3">NULL</TD>
+    <TD class="c4">YES</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">邮箱</TD></TR>
+  <TR>
+    <TD class="c1">status</TD>
+    <TD class="c2">smallint(6)</TD>
+    <TD class="c3">1</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">1 正常 2 停用</TD></TR>
+  <TR>
+    <TD class="c1">sort</TD>
+    <TD class="c2">int(11)</TD>
+    <TD class="c3">1</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">排序</TD></TR>
+  <TR>
+    <TD class="c1">created_at</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">0</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">创建时间</TD></TR>
+  <TR>
+    <TD class="c1">updated_at</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">0</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">更新时间</TD></TR>
+  <TR>
+    <TD class="c1">deleted_at</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">0</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">软删除</TD></TR>
+  </TBODY></TABLE>
+
+<P></P>
+
+<TABLE align="center" border="1" cellspacing="0" cellpadding="0">
+  <CAPTION>students 学生表</CAPTION>
+  <TBODY>
+  <TR>
+    <TH>字段名</TH>
+    <TH>数据类型</TH>
+    <TH>默认值</TH>
+    <TH>允许非空</TH>
+    <TH>自动递增</TH>
+    <TH>备注</TH></TR>
+  <TR>
+    <TD class="c1">id</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">&nbsp;</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">是</TD>
+    <TD class="c6">&nbsp;</TD></TR>
+  <TR>
+    <TD class="c1">university_id</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">&nbsp;</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">高校ID(关联customers表)</TD></TR>
+  <TR>
+    <TD class="c1">person_id</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">&nbsp;</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">关联人员ID</TD></TR>
+  <TR>
+    <TD class="c1">area_id</TD>
+    <TD class="c2">int(11)</TD>
+    <TD class="c3">NULL</TD>
+    <TD class="c4">YES</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">校区ID(关联campus_areas表)</TD></TR>
+  <TR>
+    <TD class="c1">name</TD>
+    <TD class="c2">varchar(50)</TD>
+    <TD class="c3">NULL</TD>
+    <TD class="c4">YES</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">姓名(冗余字段)</TD></TR>
+  <TR>
+    <TD class="c1">student_no</TD>
+    <TD class="c2">varchar(50)</TD>
+    <TD class="c3">&nbsp;</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">学号</TD></TR>
+  <TR>
+    <TD class="c1">grade</TD>
+    <TD class="c2">varchar(20)</TD>
+    <TD class="c3">NULL</TD>
+    <TD class="c4">YES</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">年级</TD></TR>
+  <TR>
+    <TD class="c1">education_level</TD>
+    <TD class="c2">varchar(50)</TD>
+    <TD class="c3">NULL</TD>
+    <TD class="c4">YES</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">教育层次</TD></TR>
+  <TR>
+    <TD class="c1">school_system</TD>
+    <TD class="c2">varchar(20)</TD>
+    <TD class="c3">NULL</TD>
+    <TD class="c4">YES</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">学制</TD></TR>
+  <TR>
+    <TD class="c1">id_card</TD>
+    <TD class="c2">varchar(30)</TD>
+    <TD class="c3">NULL</TD>
+    <TD class="c4">YES</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">身份证号</TD></TR>
+  <TR>
+    <TD class="c1">admission_no</TD>
+    <TD class="c2">varchar(50)</TD>
+    <TD class="c3">NULL</TD>
+    <TD class="c4">YES</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">录取编号</TD></TR>
+  <TR>
+    <TD class="c1">exam_no</TD>
+    <TD class="c2">varchar(50)</TD>
+    <TD class="c3">NULL</TD>
+    <TD class="c4">YES</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">准考证号</TD></TR>
+  <TR>
+    <TD class="c1">enrollment_status</TD>
+    <TD class="c2">tinyint(4)</TD>
+    <TD class="c3">1</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">学籍状态:1=在读,2=休学,3=毕业,4=退学,5=停学,6=复学,7=未报到,8=结业,9=肄业,10=转学,11=死亡,12=开除,13=参军,14=保留学籍,15=其他</TD></TR>
+  <TR>
+    <TD class="c1">is_enrolled</TD>
+    <TD class="c2">tinyint(4)</TD>
+    <TD class="c3">1</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">1=已报到 2=未报到</TD></TR>
+  <TR>
+    <TD class="c1">college_id</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">&nbsp;</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">学院ID(关联departments表)</TD></TR>
+  <TR>
+    <TD class="c1">faculty_id</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">NULL</TD>
+    <TD class="c4">YES</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">系ID(关联departments表)</TD></TR>
+  <TR>
+    <TD class="c1">profession_id</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">&nbsp;</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">专业ID(关联departments表)</TD></TR>
+  <TR>
+    <TD class="c1">class_id</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">NULL</TD>
+    <TD class="c4">YES</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">班级ID(关联departments表)</TD></TR>
+  <TR>
+    <TD class="c1">created_at</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">0</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">创建时间</TD></TR>
+  <TR>
+    <TD class="c1">updated_at</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">0</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">更新时间</TD></TR>
+  </TBODY></TABLE>
+
+<P></P>
+
+<TABLE align="center" border="1" cellspacing="0" cellpadding="0">
+  <CAPTION>staff 政工表</CAPTION>
+  <TBODY>
+  <TR>
+    <TH>字段名</TH>
+    <TH>数据类型</TH>
+    <TH>默认值</TH>
+    <TH>允许非空</TH>
+    <TH>自动递增</TH>
+    <TH>备注</TH></TR>
+  <TR>
+    <TD class="c1">id</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">&nbsp;</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">是</TD>
+    <TD class="c6">&nbsp;</TD></TR>
+  <TR>
+    <TD class="c1">university_id</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">&nbsp;</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">高校ID(关联customers表)</TD></TR>
+  <TR>
+    <TD class="c1">person_id</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">&nbsp;</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">关联人员ID</TD></TR>
+  <TR>
+    <TD class="c1">staff_no</TD>
+    <TD class="c2">varchar(50)</TD>
+    <TD class="c3">&nbsp;</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">工号</TD></TR>
+  <TR>
+    <TD class="c1">name</TD>
+    <TD class="c2">varchar(50)</TD>
+    <TD class="c3">NULL</TD>
+    <TD class="c4">YES</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">姓名(冗余字段)</TD></TR>
+  <TR>
+    <TD class="c1">department_id</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">NULL</TD>
+    <TD class="c4">YES</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">所属部门ID(关联departments表)</TD></TR>
+  <TR>
+    <TD class="c1">college_id</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">NULL</TD>
+    <TD class="c4">YES</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">所属学院ID(关联departments表)</TD></TR>
+  <TR>
+    <TD class="c1">faculty_id</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">NULL</TD>
+    <TD class="c4">YES</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">所属系ID(关联departments表)</TD></TR>
+  <TR>
+    <TD class="c1">created_at</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">0</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">创建时间</TD></TR>
+  <TR>
+    <TD class="c1">updated_at</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">0</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">更新时间</TD></TR>
+  </TBODY></TABLE>
+
+<P></P>
+
+<TABLE align="center" border="1" cellspacing="0" cellpadding="0">
+  <CAPTION>persons_roles 管辖角色</CAPTION>
+  <TBODY>
+  <TR>
+    <TH>字段名</TH>
+    <TH>数据类型</TH>
+    <TH>默认值</TH>
+    <TH>允许非空</TH>
+    <TH>自动递增</TH>
+    <TH>备注</TH></TR>
+  <TR>
+    <TD class="c1">id</TD>
+    <TD class="c2">int(11)</TD>
+    <TD class="c3">&nbsp;</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">管辖角色Id</TD></TR>
+  <TR>
+    <TD class="c1">customer_id</TD>
+    <TD class="c2">int(11)</TD>
+    <TD class="c3">&nbsp;</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">&nbsp;</TD></TR>
+  <TR>
+    <TD class="c1">parent_id</TD>
+    <TD class="c2">int(11)</TD>
+    <TD class="c3">0</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">上级角色组</TD></TR>
+  <TR>
+    <TD class="c1">name</TD>
+    <TD class="c2">varchar(255)</TD>
+    <TD class="c3">&nbsp;</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">角色名称</TD></TR>
+  <TR>
+    <TD class="c1">department_ids</TD>
+    <TD class="c2">text</TD>
+    <TD class="c3">NULL</TD>
+    <TD class="c4">YES</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">管辖机构</TD></TR>
+  <TR>
+    <TD class="c1">person_ids</TD>
+    <TD class="c2">text</TD>
+    <TD class="c3">NULL</TD>
+    <TD class="c4">YES</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">管辖人员</TD></TR>
+  <TR>
+    <TD class="c1">created_at</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">0</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">创建时间</TD></TR>
+  <TR>
+    <TD class="c1">updated_at</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">0</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">更新时间</TD></TR>
+  <TR>
+    <TD class="c1">deleted_at</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">0</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">软删除</TD></TR>
+  </TBODY></TABLE>
+
+<P></P>
+
+<TABLE align="center" border="1" cellspacing="0" cellpadding="0">
+  <CAPTION>persons_has_roles 用户角色</CAPTION>
+    <TBODY>
+      <TR>
+        <TH>字段名</TH>
+        <TH>数据类型</TH>
+        <TH>默认值</TH>
+        <TH>允许非空</TH>
+        <TH>自动递增</TH>
+        <TH>备注</TH>
+      </TR>
+      <TR>
+        <TD class="c1">person_id</TD>
+        <TD class="c2">int(11)</TD>
+        <TD class="c3">&nbsp;</TD>
+        <TD class="c4">NO</TD>
+        <TD class="c5">&nbsp;</TD>
+        <TD class="c6">人员ID</TD>
+      </TR>
+      <TR>
+        <TD class="c1">role_id</TD>
+        <TD class="c2">int(11)</TD>
+        <TD class="c3">&nbsp;</TD>
+        <TD class="c4">NO</TD>
+        <TD class="c5">&nbsp;</TD>
+        <TD class="c6">角色ID</TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+
+<P></P>
+
+<TABLE align="center" border="1" cellspacing="0" cellpadding="0">
+  <CAPTION>role_has_departments 角色关联部门</CAPTION>
+  <TBODY>
+  <TR>
+    <TH>字段名</TH>
+    <TH>数据类型</TH>
+    <TH>默认值</TH>
+    <TH>允许非空</TH>
+    <TH>自动递增</TH>
+    <TH>备注</TH></TR>
+  <TR>
+    <TD class="c1">role_id</TD>
+    <TD class="c2">int(11)</TD>
+    <TD class="c3">&nbsp;</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">角色主键</TD></TR>
+  <TR>
+    <TD class="c1">department_id</TD>
+    <TD class="c2">int(11)</TD>
+    <TD class="c3">&nbsp;</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">部门主键</TD></TR>
+  </TBODY></TABLE>
+
+<P></P>
+
+<TABLE align="center" border="1" cellspacing="0" cellpadding="0">
+  <CAPTION>persons_has_department 人员关联部门权限</CAPTION>
+  <TBODY>
+  <TR>
+    <TH>字段名</TH>
+    <TH>数据类型</TH>
+    <TH>默认值</TH>
+    <TH>允许非空</TH>
+    <TH>自动递增</TH>
+    <TH>备注</TH></TR>
+  <TR>
+    <TD class="c1">person_id</TD>
+    <TD class="c2">int(11)</TD>
+    <TD class="c3">&nbsp;</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">人员ID</TD></TR>
+  <TR>
+    <TD class="c1">department_id</TD>
+    <TD class="c2">int(11)</TD>
+    <TD class="c3">&nbsp;</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">部门主键</TD></TR>
+  </TBODY></TABLE>
+
+<P></P>
+
+<TABLE align="center" border="1" cellspacing="0" cellpadding="0">
+  <CAPTION>admin_users 用户表</CAPTION>
+  <TBODY>
+  <TR>
+    <TH>字段名</TH>
+    <TH>数据类型</TH>
+    <TH>默认值</TH>
+    <TH>允许非空</TH>
+    <TH>自动递增</TH>
+    <TH>备注</TH></TR>
+  <TR>
+    <TD class="c1">id</TD>
+    <TD class="c2">int(10) unsigned</TD>
+    <TD class="c3">&nbsp;</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">是</TD>
+    <TD class="c6">&nbsp;</TD></TR>
+  <TR>
+    <TD class="c1">username</TD>
+    <TD class="c2">varchar(191)</TD>
+    <TD class="c3">&nbsp;</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">昵称</TD></TR>
+  <TR>
+    <TD class="c1">password</TD>
+    <TD class="c2">varchar(191)</TD>
+    <TD class="c3">''</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">密码</TD></TR>
+  <TR>
+    <TD class="c1">email</TD>
+    <TD class="c2">varchar(191)</TD>
+    <TD class="c3">''</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">邮箱</TD></TR>
+  <TR>
+    <TD class="c1">mobile</TD>
+    <TD class="c2">varchar(191)</TD>
+    <TD class="c3">''</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">&nbsp;</TD></TR>
+  <TR>
+    <TD class="c1">wx_pc_openid</TD>
+    <TD class="c2">varchar(191)</TD>
+    <TD class="c3">''</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">微信网页授权的 openid</TD></TR>
+  <TR>
+    <TD class="c1">unionid</TD>
+    <TD class="c2">varchar(191)</TD>
+    <TD class="c3">''</TD>
+    <TD class="c4">NO</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">微信唯一用户标识 unionid</TD></TR>
+  <TR>
+    <TD class="c1">avatar</TD>
+    <TD class="c2">varchar(191)</TD>
+    <TD class="c3">NULL</TD>
+    <TD class="c4">YES</TD>
+    <TD class="c5">&nbsp;</TD>
+    <TD class="c6">头像</TD></TR>

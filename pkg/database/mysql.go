@@ -24,7 +24,8 @@ func NewMySQLConnection(cfg Config) (*sql.DB, error) {
 		cfg.Charset = "utf8mb4"
 	}
 
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=True&loc=Local",
+	// 添加连接参数优化
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=%s&parseTime=True&loc=Local&timeout=10s&readTimeout=30s&writeTimeout=30s",
 		cfg.User,
 		cfg.Password,
 		cfg.Host,
@@ -38,11 +39,11 @@ func NewMySQLConnection(cfg Config) (*sql.DB, error) {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
 
-	// 设置连接池参数
-	db.SetMaxOpenConns(100)              // 最大打开连接数
-	db.SetMaxIdleConns(10)               // 最大空闲连接数
-	db.SetConnMaxLifetime(time.Hour)     // 连接最大生命周期
-	db.SetConnMaxIdleTime(10 * time.Minute) // 连接最大空闲时间
+	// 优化连接池参数
+	db.SetMaxOpenConns(50)                   // 最大打开连接数（降低以避免耗尽）
+	db.SetMaxIdleConns(25)                   // 最大空闲连接数（增加以保持连接）
+	db.SetConnMaxLifetime(5 * time.Minute)   // 连接最大生命周期（缩短以避免超时）
+	db.SetConnMaxIdleTime(3 * time.Minute)   // 连接最大空闲时间（缩短以保持活跃）
 
 	// 测试连接
 	if err := db.Ping(); err != nil {

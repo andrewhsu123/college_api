@@ -8,6 +8,8 @@ import (
 	"college_api/internal/handler/staff"
 	baseMiddleware "college_api/internal/middleware/base"
 	staffMiddleware "college_api/internal/middleware/staff"
+	"college_api/internal/repository"
+	"college_api/internal/service"
 	"college_api/pkg/database"
 
 	"github.com/gin-gonic/gin"
@@ -39,6 +41,13 @@ func main() {
 
 	log.Println("Database connected successfully")
 
+	// 创建仓库和服务
+	deptRepo := repository.NewDepartmentRepository(db)
+	deptService := service.NewDepartmentService(deptRepo)
+
+	personRepo := repository.NewPersonRepository(db)
+	personService := service.NewPersonService(personRepo, deptRepo)
+
 	// 创建Gin引擎
 	r := gin.Default()
 
@@ -55,13 +64,15 @@ func main() {
 	{
 		// 创建中间件和处理器
 		staffAuth := staffMiddleware.NewAuthMiddleware(db)
-		staffHandler := staff.NewAuthHandler()
+		staffAuthHandler := staff.NewAuthHandler(personService)
+		staffDeptHandler := staff.NewDepartmentHandler(deptService)
 
 		// 需要认证的路由
 		staffGroup.Use(staffAuth.Authenticate())
 		{
-			staffGroup.GET("/info", staffHandler.GetPersonInfo)
-			// 在这里添加更多政工端路由
+			staffGroup.GET("/info", staffAuthHandler.GetPersonInfo)
+			staffGroup.GET("/departments/tree", staffDeptHandler.GetDepartmentTree)
+			staffGroup.GET("/departments/list", staffDeptHandler.GetDepartmentList)
 		}
 	}
 
@@ -70,13 +81,15 @@ func main() {
 	{
 		// 创建中间件和处理器
 		baseAuth := baseMiddleware.NewAuthMiddleware(db)
-		baseHandler := base.NewAuthHandler()
+		baseAuthHandler := base.NewAuthHandler(personService)
+		baseDeptHandler := base.NewDepartmentHandler(deptService)
 
 		// 需要认证的路由
 		baseGroup.Use(baseAuth.Authenticate())
 		{
-			baseGroup.GET("/info", baseHandler.GetUserInfo)
-			// 在这里添加更多学校后台路由
+			baseGroup.GET("/info", baseAuthHandler.GetUserInfo)
+			baseGroup.GET("/departments/tree", baseDeptHandler.GetDepartmentTree)
+			baseGroup.GET("/departments/list", baseDeptHandler.GetDepartmentList)
 		}
 	}
 
