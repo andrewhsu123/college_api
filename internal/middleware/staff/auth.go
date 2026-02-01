@@ -125,7 +125,7 @@ func (m *AuthMiddleware) validateToken(plainToken string) (int64, int, error) {
 		"Modules\\Persons\\Models\\Persons",
 		"Modules\\Persons\\Models\\Person",
 	}
-	
+
 	isValidType := false
 	for _, validType := range validTypes {
 		if tokenableType == validType {
@@ -133,7 +133,7 @@ func (m *AuthMiddleware) validateToken(plainToken string) (int64, int, error) {
 			break
 		}
 	}
-	
+
 	if !isValidType {
 		fmt.Printf("[STAFF DEBUG] Token类型不匹配，期望: %v, 实际: %s\n", validTypes, tokenableType)
 		return 0, 0, fmt.Errorf("Token类型错误: 此Token属于%s，不能访问政工端接口", tokenableType)

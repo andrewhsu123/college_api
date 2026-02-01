@@ -21,7 +21,7 @@ func NewDepartmentHandler(service *service.DepartmentService) *DepartmentHandler
 // GetDepartmentTree 获取机构树（仅查看有权限的机构）
 func (h *DepartmentHandler) GetDepartmentTree(c *gin.Context) {
 	println("[DEBUG] GetDepartmentTree: 开始处理请求")
-	
+
 	// 从上下文获取 customer_id 和 person_id
 	customerID, exists := c.Get("customer_id")
 	if !exists {
@@ -56,7 +56,7 @@ func (h *DepartmentHandler) GetDepartmentTree(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	persID64, ok := personID.(int64)
 	if !ok {
 		println("[ERROR] GetDepartmentTree: person_id 类型转换失败")
@@ -68,7 +68,7 @@ func (h *DepartmentHandler) GetDepartmentTree(c *gin.Context) {
 		return
 	}
 	persID := int(persID64)
-	
+
 	println("[DEBUG] GetDepartmentTree: customer_id =", custID, ", person_id =", persID)
 
 	// 获取政工人员可见的机构ID列表
@@ -141,7 +141,7 @@ func (h *DepartmentHandler) GetDepartmentList(c *gin.Context) {
 		})
 		return
 	}
-	
+
 	persID64, ok := personID.(int64)
 	if !ok {
 		println("[ERROR] GetDepartmentList: person_id 类型转换失败")
@@ -153,10 +153,10 @@ func (h *DepartmentHandler) GetDepartmentList(c *gin.Context) {
 		return
 	}
 	persID := int(persID64)
-	
+
 	// 获取查询参数
 	keyword := c.Query("keyword")
-	
+
 	var departmentType *int
 	if typeStr := c.Query("department_type"); typeStr != "" {
 		if t, err := strconv.Atoi(typeStr); err == nil {

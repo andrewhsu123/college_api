@@ -64,7 +64,7 @@ func (h *DepartmentHandler) GetDepartmentList(c *gin.Context) {
 
 	// 获取查询参数
 	keyword := c.Query("keyword")
-	
+
 	var departmentType *int
 	if typeStr := c.Query("department_type"); typeStr != "" {
 		if t, err := strconv.Atoi(typeStr); err == nil {

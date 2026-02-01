@@ -1,9 +1,6 @@
 package main
 
 import (
-	"log"
-	"os"
-	"fmt"
 	"college_api/internal/handler/base"
 	"college_api/internal/handler/staff"
 	baseMiddleware "college_api/internal/middleware/base"
@@ -11,6 +8,9 @@ import (
 	"college_api/internal/repository"
 	"college_api/internal/service"
 	"college_api/pkg/database"
+	"fmt"
+	"log"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -54,7 +54,7 @@ func main() {
 	// 健康检查
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"status": "ok",
+			"status":  "ok",
 			"message": "College API Service",
 		})
 	})
@@ -66,6 +66,7 @@ func main() {
 		staffAuth := staffMiddleware.NewAuthMiddleware(db)
 		staffAuthHandler := staff.NewAuthHandler(personService)
 		staffDeptHandler := staff.NewDepartmentHandler(deptService)
+		staffPersonHandler := staff.NewPersonHandler(personService)
 
 		// 需要认证的路由
 		staffGroup.Use(staffAuth.Authenticate())
@@ -73,6 +74,7 @@ func main() {
 			staffGroup.GET("/info", staffAuthHandler.GetPersonInfo)
 			staffGroup.GET("/departments/tree", staffDeptHandler.GetDepartmentTree)
 			staffGroup.GET("/departments/list", staffDeptHandler.GetDepartmentList)
+			staffGroup.GET("/persons/list", staffPersonHandler.GetPersonList)
 		}
 	}
 
@@ -83,6 +85,7 @@ func main() {
 		baseAuth := baseMiddleware.NewAuthMiddleware(db)
 		baseAuthHandler := base.NewAuthHandler(personService)
 		baseDeptHandler := base.NewDepartmentHandler(deptService)
+		basePersonHandler := base.NewPersonHandler(personService)
 
 		// 需要认证的路由
 		baseGroup.Use(baseAuth.Authenticate())
@@ -90,6 +93,7 @@ func main() {
 			baseGroup.GET("/info", baseAuthHandler.GetUserInfo)
 			baseGroup.GET("/departments/tree", baseDeptHandler.GetDepartmentTree)
 			baseGroup.GET("/departments/list", baseDeptHandler.GetDepartmentList)
+			baseGroup.GET("/persons/list", basePersonHandler.GetPersonList)
 		}
 	}
 

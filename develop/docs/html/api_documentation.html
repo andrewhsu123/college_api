@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人员中心服务中台 API 文档</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: #f0f2f5;
+            color: #666;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .tab-button:hover {
+            background: #e6e8eb;
+            color: #333;
+        }
+        
+        .tab-button.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+        }
+        
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .api-section {
+            margin-bottom: 2rem;
+        }
+        
+        .api-title {
+            font-size: 1.5rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .method-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+        
+        .method-get {
+            background: #61affe;
+            color: white;
+        }
+        
+        .method-post {
+            background: #49cc90;
+            color: white;
+        }
+        
+        .endpoint {
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            display: inline-block;
+            margin: 0.5rem 0;
+            font-size: 0.95rem;
+        }
+        
+        .param-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+        
+        .param-table th {
+            background: #f8f9fa;
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .param-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .param-required {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .param-optional {
+            color: #95a5a6;
+        }
+        
+        .code-block {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 1.5rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .code-block pre {
+            margin: 0;
+        }
+        
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 0.75rem 0;
+            color: #495057;
+        }
+        
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>🎓 人员中心服务中台 API 文档</h1>
+        <p>College Personnel Management Platform API Documentation v1.0</p>
+    </div>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab-button active" onclick="showTab('auth')">认证接口</button>
+            <button class="tab-button" onclick="showTab('dept')">机构接口</button>
+            <button class="tab-button" onclick="showTab('person')">人员接口</button>
+        </div>
+
+        <!-- 认证接口 -->
+        <div id="auth" class="tab-content active">
+            <div class="api-section">
+                <h2 class="api-title">1. 获取学校管理员信息</h2>
+                <div>
+                    <span class="method-badge method-get">GET</span>
+                    <span class="endpoint">/api/base/info</span>
+                </div>
+                
+                <div class="section-title">请求头</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Authorization</td>
+                            <td>string</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>Bearer {admin_token}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="section-title">响应示例</div>
+                <div class="code-block">
+<pre>{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "user_id": 1,
+    "username": "admin",
+    "email": "admin@example.com",
+    "mobile": "13800138000",
+    "avatar": "",
+    "university_id": 1,
+    "university_name": "某某大学",
+    "status": 1
+  }
+}</pre>
+                </div>
+            </div>
+
+
+            <div class="api-section">
+                <h2 class="api-title">2. 获取政工人员信息</h2>
+                <div>
+                    <span class="method-badge method-get">GET</span>
+                    <span class="endpoint">/api/staff/info</span>
+                </div>
+                
+                <div class="section-title">请求头</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Authorization</td>
+                            <td>string</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>Bearer {staff_token}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="section-title">响应示例</div>
+                <div class="code-block">
+<pre>{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "person_id": 38,
+    "person_type": 2,
+    "name": "李四",
+    "gender": 1,
+    "mobile": "13900139000",
+    "email": "lisi@example.com",
+    "avatar": "",
+    "status": 1,
+    "staff_no": "S001",
+    "university_id": 1,
+    "university_name": "某某大学",
+    "department_id": 5,
+    "department_name": "学术委员会办公室",
+    "college_id": null,
+    "college_name": null,
+    "faculty_id": null,
+    "faculty_name": null,
+    "managed_department_ids": [13, 20, 21, 46, 47, 48],
+    "managed_person_ids": [38, 37]
+  }
+}</pre>
+                </div>
+                
+                <div class="info-box">
+                    <strong>说明：</strong>managed_department_ids 包含政工人员管辖的所有部门ID（含子部门），managed_person_ids 包含直接管辖的人员ID。
+                </div>
+            </div>
+        </div>
+
+
+        <!-- 机构接口 -->
+        <div id="dept" class="tab-content">
+            <div class="api-section">
+                <h2 class="api-title">3. 获取机构树（学校管理员）</h2>
+                <div>
+                    <span class="method-badge method-get">GET</span>
+                    <span class="endpoint">/api/base/departments/tree</span>
+                </div>
+                
+                <div class="section-title">请求头</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Authorization</td>
+                            <td>string</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>Bearer {admin_token}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="section-title">请求参数</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>customer_id</td>
+                            <td>int</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>学校ID</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="section-title">请求示例</div>
+                <div class="code-block">
+<pre>GET /api/base/departments/tree?customer_id=1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</pre>
+                </div>
+
+                <div class="section-title">响应示例</div>
+                <div class="code-block">
+<pre>{
+  "code": 0,
+  "message": "success",
+  "data": [
+    {
+      "id": 1,
+      "parent_id": 0,
+      "recommend_num": 555,
+      "department_name": "某某大学",
+      "department_type": 0,
+      "tree_level": 1,
+      "items": [
+        {
+          "id": 5,
+          "parent_id": 1,
+          "recommend_num": 44,
+          "department_name": "学术委员会办公室",
+          "department_type": 1,
+          "tree_level": 3,
+          "items": []
+        },
+        {
+          "id": 10,
+          "parent_id": 1,
+          "recommend_num": 120,
+          "department_name": "计算机科学与技术学院",
+          "department_type": 2,
+          "tree_level": 3,
+          "items": [
+            {
+              "id": 11,
+              "parent_id": 10,
+              "recommend_num": 30,
+              "department_name": "软件工程系",
+              "department_type": 3,
+              "tree_level": 4,
+              "items": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}</pre>
+                </div>
+            </div>
+
+
+            <div class="api-section">
+                <h2 class="api-title">4. 获取机构树（政工人员）</h2>
+                <div>
+                    <span class="method-badge method-get">GET</span>
+                    <span class="endpoint">/api/staff/departments/tree</span>
+                </div>
+                
+                <div class="section-title">请求头</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Authorization</td>
+                            <td>string</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>Bearer {staff_token}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="section-title">请求参数</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>customer_id</td>
+                            <td>int</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>学校ID</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="warning-box">
+                    <strong>权限说明：</strong>政工人员仅能查看被授权的机构及其子机构，返回结构与学校管理员相同，但数据已过滤。
+                </div>
+
+                <div class="section-title">请求示例</div>
+                <div class="code-block">
+<pre>GET /api/staff/departments/tree?customer_id=1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</pre>
+                </div>
+
+                <div class="section-title">响应示例</div>
+                <div class="code-block">
+<pre>{
+  "code": 0,
+  "message": "success",
+  "data": [
+    {
+      "id": 1,
+      "parent_id": 0,
+      "recommend_num": 120,
+      "department_name": "某某大学",
+      "department_type": 0,
+      "tree_level": 1,
+      "items": [
+        {
+          "id": 10,
+          "parent_id": 1,
+          "recommend_num": 120,
+          "department_name": "计算机科学与技术学院",
+          "department_type": 2,
+          "tree_level": 3,
+          "items": []
+        }
+      ]
+    }
+  ]
+}</pre>
+                </div>
+            </div>
+
+
+            <div class="api-section">
+                <h2 class="api-title">5. 搜索机构列表（学校管理员）</h2>
+                <div>
+                    <span class="method-badge method-get">GET</span>
+                    <span class="endpoint">/api/base/departments/list</span>
+                </div>
+                
+                <div class="section-title">请求头</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Authorization</td>
+                            <td>string</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>Bearer {admin_token}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="section-title">请求参数</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>customer_id</td>
+                            <td>int</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>学校ID</td>
+                        </tr>
+                        <tr>
+                            <td>keyword</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>机构名称关键词（模糊查询）</td>
+                        </tr>
+                        <tr>
+                            <td>department_type</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>机构类型：0=学校 1=行政机构 2=学院 3=系 4=专业 5=班级</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="section-title">请求示例</div>
+                <div class="code-block">
+<pre>GET /api/base/departments/list?customer_id=1&keyword=学院&department_type=2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</pre>
+                </div>
+
+                <div class="section-title">响应示例</div>
+                <div class="code-block">
+<pre>{
+  "code": 0,
+  "message": "success",
+  "data": [
+    {
+      "id": 10,
+      "parent_id": 1,
+      "recommend_num": 120,
+      "department_name": "计算机科学与技术学院",
+      "department_type": 2,
+      "tree_level": 3
+    },
+    {
+      "id": 15,
+      "parent_id": 1,
+      "recommend_num": 80,
+      "department_name": "经济管理学院",
+      "department_type": 2,
+      "tree_level": 3
+    }
+  ]
+}</pre>
+                </div>
+            </div>
+
+            <div class="api-section">
+                <h2 class="api-title">6. 搜索机构列表（政工人员）</h2>
+                <div>
+                    <span class="method-badge method-get">GET</span>
+                    <span class="endpoint">/api/staff/departments/list</span>
+                </div>
+                
+                <div class="section-title">请求参数</div>
+                <p>参数与学校管理员接口相同</p>
+                
+                <div class="warning-box">
+                    <strong>权限说明：</strong>政工人员仅能搜索被授权的机构，返回结构与学校管理员相同，但数据已过滤。
+                </div>
+
+                <div class="section-title">请求示例</div>
+                <div class="code-block">
+<pre>GET /api/staff/departments/list?customer_id=1&keyword=计算机
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</pre>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- 人员接口 -->
+        <div id="person" class="tab-content">
+            <div class="api-section">
+                <h2 class="api-title">7. 查询人员列表（学校管理员）</h2>
+                <div>
+                    <span class="method-badge method-get">GET</span>
+                    <span class="endpoint">/api/base/persons/list</span>
+                </div>
+                
+                <div class="section-title">请求头</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Authorization</td>
+                            <td>string</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>Bearer {admin_token}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="section-title">请求参数</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>university_id</td>
+                            <td>int</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>学校ID</td>
+                        </tr>
+                        <tr>
+                            <td>person_type</td>
+                            <td>int</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>人员类型：1=学生 2=政工</td>
+                        </tr>
+                        <tr>
+                            <td>page</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>页码（默认1）</td>
+                        </tr>
+                        <tr>
+                            <td>page_size</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>每页数量（默认20，最大100）</td>
+                        </tr>
+                        <tr>
+                            <td>with_extend</td>
+                            <td>bool</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>是否包含扩展信息（默认false）</td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" style="background: #f0f2f5; font-weight: bold;">基础字段搜索</td>
+                        </tr>
+                        <tr>
+                            <td>name</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>姓名模糊查询</td>
+                        </tr>
+                        <tr>
+                            <td>mobile</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>手机号</td>
+                        </tr>
+                        <tr>
+                            <td>email</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>邮箱</td>
+                        </tr>
+                        <tr>
+                            <td>gender</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>性别：1=男 2=女</td>
+                        </tr>
+                        <tr>
+                            <td>status</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>状态：1=正常 2=禁用</td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" style="background: #f0f2f5; font-weight: bold;">学生扩展字段搜索（person_type=1时可用）</td>
+                        </tr>
+                        <tr>
+                            <td>student_no</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>学号</td>
+                        </tr>
+                        <tr>
+                            <td>grade</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>年级</td>
+                        </tr>
+                        <tr>
+                            <td>college_id</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>学院ID</td>
+                        </tr>
+                        <tr>
+                            <td>profession_id</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>专业ID</td>
+                        </tr>
+                        <tr>
+                            <td>class_id</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>班级ID</td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" style="background: #f0f2f5; font-weight: bold;">政工扩展字段搜索（person_type=2时可用）</td>
+                        </tr>
+                        <tr>
+                            <td>staff_no</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>工号</td>
+                        </tr>
+                        <tr>
+                            <td>department_id</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>部门ID</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+
+                <div class="section-title">请求示例 1：查询学生列表（不含扩展）</div>
+                <div class="code-block">
+<pre>GET /api/base/persons/list?university_id=1&person_type=1&page=1&page_size=20
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</pre>
+                </div>
+
+                <div class="section-title">响应示例 1：不含扩展信息</div>
+                <div class="code-block">
+<pre>{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "items": [
+      {
+        "id": 10,
+        "customer_id": 1,
+        "person_type": 1,
+        "name": "张三",
+        "gender": 1,
+        "mobile": "13800138000",
+        "email": "zhangsan@example.com",
+        "avatar": "https://example.com/avatar/10.jpg",
+        "status": 1
+      },
+      {
+        "id": 11,
+        "customer_id": 1,
+        "person_type": 1,
+        "name": "李四",
+        "gender": 2,
+        "mobile": "13800138001",
+        "email": "lisi@example.com",
+        "avatar": "",
+        "status": 1
+      }
+    ],
+    "total": 100,
+    "page": 1,
+    "page_size": 20
+  }
+}</pre>
+                </div>
+
+                <div class="section-title">请求示例 2：查询学生列表（含扩展）</div>
+                <div class="code-block">
+<pre>GET /api/base/persons/list?university_id=1&person_type=1&page=1&page_size=20&with_extend=true&grade=2023
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</pre>
+                </div>
+
+                <div class="section-title">响应示例 2：含学生扩展信息</div>
+                <div class="code-block">
+<pre>{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "items": [
+      {
+        "id": 10,
+        "customer_id": 1,
+        "person_type": 1,
+        "name": "张三",
+        "gender": 1,
+        "mobile": "13800138000",
+        "email": "zhangsan@example.com",
+        "avatar": "https://example.com/avatar/10.jpg",
+        "status": 1,
+        "student_extend": {
+          "person_id": 10,
+          "area_id": 1,
+          "student_no": "2023001",
+          "grade": "2023",
+          "education_level": "本科",
+          "school_system": "4年",
+          "id_card": "110101199001011234",
+          "admission_no": "A2023001",
+          "exam_no": "E2023001",
+          "enrollment_status": 1,
+          "is_enrolled": 1,
+          "college_id": 10,
+          "faculty_id": 11,
+          "profession_id": 12,
+          "class_id": 13
+        }
+      }
+    ],
+    "total": 50,
+    "page": 1,
+    "page_size": 20
+  }
+}</pre>
+                </div>
+
+                <div class="section-title">请求示例 3：查询政工列表（含扩展）</div>
+                <div class="code-block">
+<pre>GET /api/base/persons/list?university_id=1&person_type=2&with_extend=true&department_id=5
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</pre>
+                </div>
+
+                <div class="section-title">响应示例 3：含政工扩展信息</div>
+                <div class="code-block">
+<pre>{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "items": [
+      {
+        "id": 38,
+        "customer_id": 1,
+        "person_type": 2,
+        "name": "王五",
+        "gender": 1,
+        "mobile": "13900139000",
+        "email": "wangwu@example.com",
+        "avatar": "",
+        "status": 1,
+        "staff_extend": {
+          "person_id": 38,
+          "staff_no": "S001",
+          "department_id": 5,
+          "college_id": 10,
+          "faculty_id": null
+        }
+      }
+    ],
+    "total": 10,
+    "page": 1,
+    "page_size": 20
+  }
+}</pre>
+                </div>
+            </div>
+
+
+            <div class="api-section">
+                <h2 class="api-title">8. 查询人员列表（政工人员）</h2>
+                <div>
+                    <span class="method-badge method-get">GET</span>
+                    <span class="endpoint">/api/staff/persons/list</span>
+                </div>
+                
+                <div class="section-title">请求头</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Authorization</td>
+                            <td>string</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>Bearer {staff_token}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="section-title">请求参数</div>
+                <p>参数与学校管理员接口完全相同</p>
+                
+                <div class="warning-box">
+                    <strong>权限说明：</strong>政工人员仅能查看管辖权限下的人员
+                    <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                        <li>人员ID在 managed_person_ids 中</li>
+                        <li>人员所属部门在 managed_department_ids 中（通过学生/政工扩展表关联）</li>
+                    </ul>
+                </div>
+
+                <div class="section-title">请求示例</div>
+                <div class="code-block">
+<pre>GET /api/staff/persons/list?university_id=1&person_type=1&page=1&page_size=20&with_extend=true
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</pre>
+                </div>
+
+                <div class="section-title">响应示例</div>
+                <div class="code-block">
+<pre>{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "items": [
+      {
+        "id": 10,
+        "customer_id": 1,
+        "person_type": 1,
+        "name": "张三",
+        "gender": 1,
+        "mobile": "13800138000",
+        "email": "zhangsan@example.com",
+        "avatar": "",
+        "status": 1,
+        "student_extend": {
+          "person_id": 10,
+          "area_id": 1,
+          "student_no": "2023001",
+          "grade": "2023",
+          "education_level": "本科",
+          "school_system": "4年",
+          "id_card": "110101199001011234",
+          "admission_no": "A2023001",
+          "exam_no": "E2023001",
+          "enrollment_status": 1,
+          "is_enrolled": 1,
+          "college_id": 10,
+          "faculty_id": 11,
+          "profession_id": 12,
+          "class_id": 13
+        }
+      }
+    ],
+    "total": 30,
+    "page": 1,
+    "page_size": 20
+  }
+}</pre>
+                </div>
+                
+                <div class="info-box">
+                    <strong>提示：</strong>返回的人员数量取决于政工人员的管辖权限，total 表示该政工人员可见的总人员数。
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            // 隐藏所有标签内容
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // 移除所有按钮的激活状态
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // 显示选中的标签内容
+            document.getElementById(tabName).classList.add('active');
+            
+            // 激活对应的按钮
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>

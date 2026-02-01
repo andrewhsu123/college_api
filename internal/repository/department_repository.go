@@ -198,7 +198,7 @@ func (r *DepartmentRepository) GetRoleDepartmentIDs(customerID int, roleIDs []in
 		FROM persons_roles 
 		WHERE customer_id = ? AND id IN (%s)
 	`, strings.Join(placeholders, ","))
-	
+
 	println("[SQL] GetRoleDepartmentIDs:", query)
 	println("[SQL PARAMS] customer_id =", customerID, ", role_ids =", roleIDs)
 

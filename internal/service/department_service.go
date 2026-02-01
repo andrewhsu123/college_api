@@ -19,7 +19,7 @@ func NewDepartmentService(repo *repository.DepartmentRepository) *DepartmentServ
 // GetDepartmentTree 获取机构树
 func (s *DepartmentService) GetDepartmentTree(customerID int, visibleDeptIDs []int) ([]model.DepartmentNode, error) {
 	println("[DEBUG] GetDepartmentTree: customerID =", customerID, ", visibleDeptIDs 数量 =", len(visibleDeptIDs))
-	
+
 	// 如果 visibleDeptIDs 为空（政工人员没有任何权限），返回空树
 	if visibleDeptIDs != nil && len(visibleDeptIDs) == 0 {
 		println("[DEBUG] GetDepartmentTree: 没有可见机构权限，返回空树")
@@ -74,7 +74,7 @@ func (s *DepartmentService) GetDepartmentList(customerID int, keyword string, de
 // GetStaffVisibleDepartmentIDs 获取政工人员可见的机构ID列表（包含子机构）
 func (s *DepartmentService) GetStaffVisibleDepartmentIDs(customerID, personID int) ([]int, error) {
 	println("[DEBUG] GetStaffVisibleDepartmentIDs: customerID =", customerID, ", personID =", personID)
-	
+
 	// 1. 获取政工人员的所有角色
 	println("[DEBUG] GetStaffVisibleDepartmentIDs: 查询角色ID")
 	roleIDs, err := s.repo.GetStaffRoleIDs(personID)
@@ -145,13 +145,13 @@ func (s *DepartmentService) buildTreeStructure(school *model.Department, depts [
 	println("[DEBUG] buildTreeStructure: 开始构建树形结构")
 	println("[DEBUG] buildTreeStructure: 学校ID =", school.ID, ", 学校名称 =", school.DepartmentName)
 	println("[DEBUG] buildTreeStructure: 机构总数 =", len(depts))
-	
+
 	// 创建机构映射表
 	deptMap := make(map[int]model.Department)
 	for _, dept := range depts {
 		deptMap[dept.ID] = dept
 	}
-	
+
 	// 递归构建子树
 	var buildNode func(dept model.Department) model.DepartmentNode
 	buildNode = func(dept model.Department) model.DepartmentNode {
@@ -164,7 +164,7 @@ func (s *DepartmentService) buildTreeStructure(school *model.Department, depts [
 			TreeLevel:      dept.TreeLevel,
 			Items:          []model.DepartmentNode{},
 		}
-		
+
 		// 查找所有子节点
 		for _, childDept := range depts {
 			if childDept.ParentID == dept.ID {
@@ -173,10 +173,10 @@ func (s *DepartmentService) buildTreeStructure(school *model.Department, depts [
 				println("[DEBUG] buildTreeStructure: 将机构", childDept.ID, "挂在父节点", dept.ID, "下")
 			}
 		}
-		
+
 		return node
 	}
-	
+
 	// 初始化学校节点
 	schoolNode := model.DepartmentNode{
 		ID:             school.ID,
@@ -187,7 +187,7 @@ func (s *DepartmentService) buildTreeStructure(school *model.Department, depts [
 		TreeLevel:      school.TreeLevel,
 		Items:          []model.DepartmentNode{},
 	}
-	
+
 	// 查找所有 tree_level = 3 的机构作为学校的直接子节点
 	level3Count := 0
 	for _, dept := range depts {
@@ -198,7 +198,7 @@ func (s *DepartmentService) buildTreeStructure(school *model.Department, depts [
 			println("[DEBUG] buildTreeStructure: 将机构", dept.ID, "挂在学校节点下，子节点数:", len(childNode.Items))
 		}
 	}
-	
+
 	println("[DEBUG] buildTreeStructure: 学校节点下有", level3Count, "个直接子节点")
 	println("[DEBUG] buildTreeStructure: 学校节点的 Items 数量 =", len(schoolNode.Items))
 

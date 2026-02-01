@@ -5,10 +5,10 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"strings"
 	"time"
-	"github.com/gin-gonic/gin"
 )
 
 // AuthMiddleware 学校后台Token验证中间件
@@ -166,6 +166,6 @@ func (m *AuthMiddleware) validateToken(plainToken string) (int64, int, error) {
 	_, _ = m.db.Exec(updateQuery, time.Now(), tokenHash)
 
 	fmt.Printf("[DEBUG] Token验证成功，UserID: %d, CustomerID: %d\n", userID, customerID)
-	
+
 	return userID, customerID, nil
 }
