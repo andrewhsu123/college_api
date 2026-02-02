@@ -24,11 +24,11 @@ func main() {
 
 	// 数据库配置
 	dbConfig := database.Config{
-		Host:     getEnv("DB_HOST", "127.0.0.1"),
+		Host:     getEnv("DB_HOST", "1.13.252.190"),
 		Port:     getEnvAsInt("DB_PORT", 3306),
-		User:     getEnv("DB_USER", "root"),
-		Password: getEnv("DB_PASSWORD", "root"),
-		Database: getEnv("DB_DATABASE", "college_db_base"),
+		User:     getEnv("DB_USER", "college_dev_base"),
+		Password: getEnv("DB_PASSWORD", "college_dev_base"),
+		Database: getEnv("DB_DATABASE", "college_dev_base"),
 		Charset:  "utf8mb4",
 	}
 
