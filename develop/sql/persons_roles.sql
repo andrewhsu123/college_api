@@ -20,14 +20,13 @@ SET FOREIGN_KEY_CHECKS=0;
 -- ----------------------------
 DROP TABLE IF EXISTS `persons_roles`;
 CREATE TABLE `persons_roles` (
-  `id` int(11) NOT NULL COMMENT '管辖角色Id',
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '管辖角色Id',
   `customer_id` int(11) NOT NULL,
   `parent_id` int(11) NOT NULL DEFAULT '0' COMMENT '上级角色组',
   `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '角色名称',
-  `department_ids` text COLLATE utf8mb4_unicode_ci COMMENT '管辖机构',
-  `person_ids` text COLLATE utf8mb4_unicode_ci COMMENT '管辖人员',
+  `permissions` text COLLATE utf8mb4_unicode_ci COMMENT '角色权限',
   `created_at` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
   `updated_at` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间',
   `deleted_at` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '软删除',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='管辖角色';
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='管辖角色';

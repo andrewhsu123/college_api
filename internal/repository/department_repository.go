@@ -20,12 +20,11 @@ func NewDepartmentRepository(db *sql.DB) *DepartmentRepository {
 // GetSchool 查询学校机构
 func (r *DepartmentRepository) GetSchool(customerID int) (*model.Department, error) {
 	query := `
-		SELECT id, parent_id, recommend_num, department_name, department_type, tree_level
-		FROM departments
-		WHERE customer_id = ? AND department_type = 0 AND deleted_at = 0
-		LIMIT 1
-	`
-
+        SELECT id, parent_id, recommend_num, department_name, department_type, tree_level
+        FROM departments
+        WHERE customer_id = ? AND department_type = 0 AND deleted_at = 0
+        LIMIT 1
+    `
 	var dept model.Department
 	err := r.db.QueryRow(query, customerID).Scan(
 		&dept.ID,
@@ -35,27 +34,23 @@ func (r *DepartmentRepository) GetSchool(customerID int) (*model.Department, err
 		&dept.DepartmentType,
 		&dept.TreeLevel,
 	)
-
 	if err != nil {
 		return nil, err
 	}
-
 	return &dept, nil
 }
 
 // GetAdminDepartments 查询行政机构
 func (r *DepartmentRepository) GetAdminDepartments(customerID int, visibleDeptIDs []int) ([]model.Department, error) {
 	query := `
-		SELECT id, parent_id, recommend_num, department_name, department_type, tree_level
-		FROM departments
-		WHERE customer_id = ? 
-		  AND tree_level > 2 
-		  AND department_type = 1 
-		  AND deleted_at = 0
-	`
-
+        SELECT id, parent_id, recommend_num, department_name, department_type, tree_level
+        FROM departments
+        WHERE customer_id = ? 
+          AND tree_level > 2 
+          AND department_type = 1 
+          AND deleted_at = 0
+    `
 	args := []interface{}{customerID}
-
 	// 政工人员：添加权限过滤
 	if visibleDeptIDs != nil && len(visibleDeptIDs) > 0 {
 		placeholders := make([]string, len(visibleDeptIDs))
@@ -65,9 +60,7 @@ func (r *DepartmentRepository) GetAdminDepartments(customerID int, visibleDeptID
 		}
 		query += fmt.Sprintf(" AND id IN (%s)", strings.Join(placeholders, ","))
 	}
-
 	query += " ORDER BY tree_left"
-
 	rows, err := r.db.Query(query, args...)
 	if err != nil {
 		return nil, err
@@ -80,14 +73,13 @@ func (r *DepartmentRepository) GetAdminDepartments(customerID int, visibleDeptID
 // GetOrgDepartments 查询组织机构
 func (r *DepartmentRepository) GetOrgDepartments(customerID int, visibleDeptIDs []int) ([]model.Department, error) {
 	query := `
-		SELECT id, parent_id, recommend_num, department_name, department_type, tree_level
-		FROM departments
-		WHERE customer_id = ? 
-		  AND tree_level > 2 
-		  AND department_type != 1 
-		  AND deleted_at = 0
-	`
-
+        SELECT id, parent_id, recommend_num, department_name, department_type, tree_level
+        FROM departments
+        WHERE customer_id = ? 
+            AND tree_level > 2 
+            AND department_type != 1 
+            AND deleted_at = 0
+    `
 	args := []interface{}{customerID}
 
 	// 政工人员：添加权限过滤
@@ -114,25 +106,22 @@ func (r *DepartmentRepository) GetOrgDepartments(customerID int, visibleDeptIDs 
 // SearchDepartments 搜索机构列表
 func (r *DepartmentRepository) SearchDepartments(customerID int, keyword string, departmentType *int, visibleDeptIDs []int) ([]model.Department, error) {
 	query := `
-		SELECT id, parent_id, recommend_num, department_name, department_type, tree_level
-		FROM departments
-		WHERE customer_id = ? AND deleted_at = 0
-	`
+        SELECT id, parent_id, recommend_num, department_name, department_type, tree_level
+        FROM departments
+        WHERE customer_id = ? AND deleted_at = 0 AND tree_level IS NOT NULL
+    `
 
 	args := []interface{}{customerID}
-
 	// 名称模糊查询
 	if keyword != "" {
 		query += " AND department_name LIKE ?"
 		args = append(args, "%"+keyword+"%")
 	}
-
 	// 类型查询
 	if departmentType != nil {
 		query += " AND department_type = ?"
 		args = append(args, *departmentType)
 	}
-
 	// 政工人员：添加权限过滤
 	if visibleDeptIDs != nil && len(visibleDeptIDs) > 0 {
 		placeholders := make([]string, len(visibleDeptIDs))
@@ -142,9 +131,7 @@ func (r *DepartmentRepository) SearchDepartments(customerID int, keyword string,
 		}
 		query += fmt.Sprintf(" AND id IN (%s)", strings.Join(placeholders, ","))
 	}
-
 	query += " ORDER BY tree_level, tree_left"
-
 	rows, err := r.db.Query(query, args...)
 	if err != nil {
 		return nil, err
@@ -154,14 +141,12 @@ func (r *DepartmentRepository) SearchDepartments(customerID int, keyword string,
 	return r.scanDepartments(rows)
 }
 
-// GetStaffRoleIDs 获取政工人员的角色ID列表
-func (r *DepartmentRepository) GetStaffRoleIDs(personID int) ([]int, error) {
-	query := `SELECT role_id FROM persons_has_roles WHERE person_id = ?`
-	println("[SQL] GetStaffRoleIDs:", query, "| person_id =", personID)
+// GetStaffRoleIDs 获取人员的角色ID列表（新表结构：先查customer_id再查role_id）
+func (r *DepartmentRepository) GetStaffRoleIDs(customerID, personID int) ([]int, error) {
+	query := `SELECT role_id FROM persons_has_roles WHERE customer_id = ? AND person_id = ?`
 
-	rows, err := r.db.Query(query, personID)
+	rows, err := r.db.Query(query, customerID, personID)
 	if err != nil {
-		println("[SQL ERROR] GetStaffRoleIDs:", err.Error())
 		return nil, err
 	}
 	defer rows.Close()
@@ -170,154 +155,96 @@ func (r *DepartmentRepository) GetStaffRoleIDs(personID int) ([]int, error) {
 	for rows.Next() {
 		var roleID int
 		if err := rows.Scan(&roleID); err != nil {
-			println("[SQL ERROR] GetStaffRoleIDs Scan:", err.Error())
 			return nil, err
 		}
 		roleIDs = append(roleIDs, roleID)
 	}
 
-	println("[SQL RESULT] GetStaffRoleIDs: 查询到", len(roleIDs), "个角色")
 	return roleIDs, nil
 }
 
-// GetRoleDepartmentIDs 获取角色的部门权限ID列表
-func (r *DepartmentRepository) GetRoleDepartmentIDs(customerID int, roleIDs []int) ([]int, error) {
-	if len(roleIDs) == 0 {
-		return []int{}, nil
-	}
+// GetPersonRoles 获取人员的角色详情列表
+func (r *DepartmentRepository) GetPersonRoles(customerID, personID int) ([]model.PersonsRole, error) {
+	query := `
+        SELECT pr.id, pr.customer_id, pr.parent_id, pr.name, COALESCE(pr.permissions, '') as permissions
+        FROM persons_roles pr
+        INNER JOIN persons_has_roles phr ON pr.id = phr.role_id AND pr.customer_id = phr.customer_id
+        WHERE phr.customer_id = ? AND phr.person_id = ? AND pr.deleted_at = 0
+    `
 
-	placeholders := make([]string, len(roleIDs))
-	args := []interface{}{customerID}
-	for i, id := range roleIDs {
-		placeholders[i] = "?"
-		args = append(args, id)
-	}
-
-	query := fmt.Sprintf(`
-		SELECT department_ids 
-		FROM persons_roles 
-		WHERE customer_id = ? AND id IN (%s)
-	`, strings.Join(placeholders, ","))
-
-	println("[SQL] GetRoleDepartmentIDs:", query)
-	println("[SQL PARAMS] customer_id =", customerID, ", role_ids =", roleIDs)
-
-	rows, err := r.db.Query(query, args...)
+	rows, err := r.db.Query(query, customerID, personID)
 	if err != nil {
-		println("[SQL ERROR] GetRoleDepartmentIDs:", err.Error())
 		return nil, err
 	}
 	defer rows.Close()
 
-	deptIDMap := make(map[int]bool)
-	rowCount := 0
+	var roles []model.PersonsRole
 	for rows.Next() {
-		rowCount++
-		var departmentIDs string
-		if err := rows.Scan(&departmentIDs); err != nil {
-			println("[SQL ERROR] GetRoleDepartmentIDs Scan:", err.Error())
+		var role model.PersonsRole
+		if err := rows.Scan(&role.ID, &role.CustomerID, &role.ParentID, &role.Name, &role.Permissions); err != nil {
 			return nil, err
 		}
-
-		println("[SQL ROW]", rowCount, "department_ids =", departmentIDs)
-
-		// 解析 JSON 数组格式的 department_ids
-		// 简单处理：去掉 [ ] 和空格，按逗号分割
-		departmentIDs = strings.Trim(departmentIDs, "[]")
-		if departmentIDs == "" {
-			continue
-		}
-
-		ids := strings.Split(departmentIDs, ",")
-		for _, idStr := range ids {
-			var id int
-			if _, err := fmt.Sscanf(strings.TrimSpace(idStr), "%d", &id); err == nil {
-				deptIDMap[id] = true
-			}
-		}
+		roles = append(roles, role)
 	}
 
-	result := make([]int, 0, len(deptIDMap))
-	for id := range deptIDMap {
-		result = append(result, id)
-	}
-
-	println("[SQL RESULT] GetRoleDepartmentIDs: 查询到", rowCount, "行，解析出", len(result), "个部门ID")
-	return result, nil
+	return roles, nil
 }
 
-// GetRolePersonIDs 获取角色的人员权限ID列表
-func (r *DepartmentRepository) GetRolePersonIDs(customerID int, roleIDs []int) ([]int, error) {
-	if len(roleIDs) == 0 {
-		return []int{}, nil
+// GetRoleParentName 获取角色的上级角色组名称
+func (r *DepartmentRepository) GetRoleParentName(customerID, parentID int) (string, error) {
+	if parentID == 0 {
+		return "", nil
 	}
 
-	placeholders := make([]string, len(roleIDs))
-	args := []interface{}{customerID}
-	for i, id := range roleIDs {
-		placeholders[i] = "?"
-		args = append(args, id)
-	}
+	query := `SELECT name FROM persons_roles WHERE customer_id = ? AND id = ? AND deleted_at = 0 LIMIT 1`
 
-	query := fmt.Sprintf(`
-		SELECT person_ids 
-		FROM persons_roles 
-		WHERE customer_id = ? AND id IN (%s)
-	`, strings.Join(placeholders, ","))
-
-	println("[SQL] GetRolePersonIDs:", query)
-	println("[SQL PARAMS] customer_id =", customerID, ", role_ids =", roleIDs)
-
-	rows, err := r.db.Query(query, args...)
+	var name string
+	err := r.db.QueryRow(query, customerID, parentID).Scan(&name)
 	if err != nil {
-		println("[SQL ERROR] GetRolePersonIDs:", err.Error())
+		if err == sql.ErrNoRows {
+			return "", nil
+		}
+		return "", err
+	}
+
+	return name, nil
+}
+
+// GetRoleManagedDepartments 获取角色+人员对应的管辖机构列表
+func (r *DepartmentRepository) GetRoleManagedDepartments(customerID, personID, roleID int) ([]model.ManagedDepartment, error) {
+	query := `
+        SELECT d.id, d.parent_id, d.department_name, d.department_type, 1 as status
+        FROM departments d
+        INNER JOIN persons_has_department phd ON d.id = phd.department_id
+        WHERE phd.customer_id = ? AND phd.person_id = ? AND phd.persons_roles_id = ?
+          AND d.deleted_at = 0
+        ORDER BY d.tree_left
+    `
+
+	rows, err := r.db.Query(query, customerID, personID, roleID)
+	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	personIDMap := make(map[int]bool)
-	rowCount := 0
+	var departments []model.ManagedDepartment
 	for rows.Next() {
-		rowCount++
-		var personIDs string
-		if err := rows.Scan(&personIDs); err != nil {
-			println("[SQL ERROR] GetRolePersonIDs Scan:", err.Error())
+		var dept model.ManagedDepartment
+		if err := rows.Scan(&dept.ID, &dept.ParentID, &dept.DepartmentName, &dept.DepartmentType, &dept.Status); err != nil {
 			return nil, err
 		}
-
-		println("[SQL ROW]", rowCount, "person_ids =", personIDs)
-
-		// 解析 JSON 数组格式的 person_ids
-		// 简单处理：去掉 [ ] 和空格，按逗号分割
-		personIDs = strings.Trim(personIDs, "[]")
-		if personIDs == "" {
-			continue
-		}
-
-		ids := strings.Split(personIDs, ",")
-		for _, idStr := range ids {
-			var id int
-			if _, err := fmt.Sscanf(strings.TrimSpace(idStr), "%d", &id); err == nil {
-				personIDMap[id] = true
-			}
-		}
+		departments = append(departments, dept)
 	}
 
-	result := make([]int, 0, len(personIDMap))
-	for id := range personIDMap {
-		result = append(result, id)
-	}
-
-	println("[SQL RESULT] GetRolePersonIDs: 查询到", rowCount, "行，解析出", len(result), "个人员ID")
-	return result, nil
+	return departments, nil
 }
-func (r *DepartmentRepository) GetDirectDepartmentIDs(personID int) ([]int, error) {
-	query := `SELECT department_id FROM persons_has_department WHERE person_id = ?`
-	println("[SQL] GetDirectDepartmentIDs:", query, "| person_id =", personID)
 
-	rows, err := r.db.Query(query, personID)
+// GetDirectDepartmentIDs 获取人员在某角色下的直接管辖机构ID列表
+func (r *DepartmentRepository) GetDirectDepartmentIDs(customerID, personID int) ([]int, error) {
+	query := `SELECT department_id FROM persons_has_department WHERE customer_id = ? AND person_id = ?`
+
+	rows, err := r.db.Query(query, customerID, personID)
 	if err != nil {
-		println("[SQL ERROR] GetDirectDepartmentIDs:", err.Error())
 		return nil, err
 	}
 	defer rows.Close()
@@ -326,13 +253,11 @@ func (r *DepartmentRepository) GetDirectDepartmentIDs(personID int) ([]int, erro
 	for rows.Next() {
 		var deptID int
 		if err := rows.Scan(&deptID); err != nil {
-			println("[SQL ERROR] GetDirectDepartmentIDs Scan:", err.Error())
 			return nil, err
 		}
 		deptIDs = append(deptIDs, deptID)
 	}
 
-	println("[SQL RESULT] GetDirectDepartmentIDs: 查询到", len(deptIDs), "个直接部门权限")
 	return deptIDs, nil
 }
 
@@ -350,18 +275,18 @@ func (r *DepartmentRepository) ExpandDepartmentIDs(customerID int, deptIDs []int
 	}
 
 	query := fmt.Sprintf(`
-		SELECT DISTINCT d.id
-		FROM departments d
-		WHERE d.customer_id = ?
-		  AND d.deleted_at = 0
-		  AND EXISTS (
-			SELECT 1 
-			FROM departments p
-			WHERE p.id IN (%s)
-			  AND d.tree_left >= p.tree_left
-			  AND d.tree_right <= p.tree_right
-		  )
-	`, strings.Join(placeholders, ","))
+        SELECT DISTINCT d.id
+        FROM departments d
+        WHERE d.customer_id = ?
+          AND d.deleted_at = 0
+          AND EXISTS (
+            SELECT 1 
+            FROM departments p
+            WHERE p.id IN (%s)
+              AND d.tree_left >= p.tree_left
+              AND d.tree_right <= p.tree_right
+          )
+    `, strings.Join(placeholders, ","))
 
 	println("[SQL] ExpandDepartmentIDs:", query)
 	println("[SQL PARAMS] customer_id =", customerID, ", dept_ids =", deptIDs)

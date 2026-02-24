@@ -2,8 +2,10 @@ package main
 
 import (
 	"college_api/internal/handler/base"
+	"college_api/internal/handler/open"
 	"college_api/internal/handler/staff"
 	baseMiddleware "college_api/internal/middleware/base"
+	openMiddleware "college_api/internal/middleware/open"
 	staffMiddleware "college_api/internal/middleware/staff"
 	"college_api/internal/repository"
 	"college_api/internal/service"
@@ -21,17 +23,15 @@ func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("Warning: .env file not found")
 	}
-
 	// 数据库配置
 	dbConfig := database.Config{
-		Host:     getEnv("DB_HOST", "1.13.252.190"),
+		Host:     getEnv("DB_HOST", "localhost"),
 		Port:     getEnvAsInt("DB_PORT", 3306),
-		User:     getEnv("DB_USER", "college_dev_base"),
-		Password: getEnv("DB_PASSWORD", "college_dev_base"),
-		Database: getEnv("DB_DATABASE", "college_dev_base"),
+		User:     getEnv("DB_USER", "root"),
+		Password: getEnv("DB_PASSWORD", "root"),
+		Database: getEnv("DB_DATABASE", "college_db_base"),
 		Charset:  "utf8mb4",
 	}
-
 	// 连接数据库
 	db, err := database.NewMySQLConnection(dbConfig)
 	if err != nil {
@@ -39,7 +39,7 @@ func main() {
 	}
 	defer db.Close()
 
-	log.Println("Database connected successfully")
+	// log.Println("Database connected successfully")
 
 	// 创建仓库和服务
 	deptRepo := repository.NewDepartmentRepository(db)
@@ -47,6 +47,12 @@ func main() {
 
 	personRepo := repository.NewPersonRepository(db)
 	personService := service.NewPersonService(personRepo, deptRepo)
+
+	appRepo := repository.NewApplicationRepository(db)
+	appService := service.NewApplicationService(appRepo)
+
+	openPersonRepo := repository.NewOpenPersonRepository(db)
+	openPersonService := service.NewOpenPersonService(openPersonRepo)
 
 	// 创建Gin引擎
 	r := gin.Default()
@@ -94,6 +100,24 @@ func main() {
 			baseGroup.GET("/departments/tree", baseDeptHandler.GetDepartmentTree)
 			baseGroup.GET("/departments/list", baseDeptHandler.GetDepartmentList)
 			baseGroup.GET("/persons/list", basePersonHandler.GetPersonList)
+		}
+	}
+
+	// 开放接口路由组
+	openGroup := r.Group("/api/open")
+	{
+		// 创建处理器
+		openAppHandler := open.NewApplicationHandler(appService)
+		openPersonHandler := open.NewPersonHandler(openPersonService)
+
+		// 使用秘钥认证中间件
+		openGroup.Use(openMiddleware.AuthMiddleware())
+		{
+			openGroup.GET("/applications/list", openAppHandler.GetApplicationList)
+			openGroup.GET("/applications/visible", openAppHandler.GetVisibleApplications)
+			openGroup.GET("/staff/list", openPersonHandler.GetStaffList)
+			openGroup.GET("/students/list", openPersonHandler.GetStudentList)
+			openGroup.GET("/roles/list", openPersonHandler.GetRoleList)
 		}
 	}
 

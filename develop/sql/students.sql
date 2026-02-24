@@ -25,7 +25,7 @@ CREATE TABLE `students` (
   `person_id` int(10) unsigned NOT NULL COMMENT '关联人员ID',
   `area_id` int(11) DEFAULT NULL COMMENT '校区ID(关联campus_areas表)',
   `name` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '姓名(冗余字段)',
-  `student_no` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '学号',
+  `student_no` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '学号',
   `grade` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '年级',
   `education_level` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '教育层次',
   `school_system` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '学制',

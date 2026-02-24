@@ -49,15 +49,109 @@ type Person struct {
 }
 ```
 
-### 2.2 PersonDetail（人员详情，包含关联信息）
+### 2.2 PersonInfo（人员完整信息，根据person_type返回不同字段）
 
 ```go
-type PersonDetail struct {
-    Person
-    Student      *Student      `json:"student,omitempty"`       // 学生信息
-    Staff        *Staff        `json:"staff,omitempty"`         // 政工信息
-    Roles        []Role        `json:"roles,omitempty"`         // 角色列表
-    Departments  []Department  `json:"departments,omitempty"`   // 所属机构
+// PersonInfo 人员完整信息（根据person_type返回不同字段）
+type PersonInfo struct {
+    // Person 基础信息
+    PersonID       int    `json:"person_id"`
+    PersonType     int    `json:"person_type"`
+    UniversityID   int    `json:"university_id"`
+    UniversityName string `json:"university_name"` // 学校名称
+    Name           string `json:"name"`
+    Gender         *int   `json:"gender"`
+    Mobile         string `json:"mobile"`
+    Email          string `json:"email"`
+    Avatar         string `json:"avatar"`
+    Status         int    `json:"status"` // 1=正常 2=禁用
+
+    // Staff 扩展信息（政工和维修工 person_type=2,3）
+    StaffNo        string  `json:"staff_no,omitempty"`
+    DepartmentID   *int    `json:"department_id,omitempty"`
+    DepartmentName *string `json:"department_name,omitempty"` // 部门名称
+    CollegeID      *int    `json:"college_id,omitempty"`
+    CollegeName    *string `json:"college_name,omitempty"` // 学院名称
+    FacultyID      *int    `json:"faculty_id,omitempty"`
+    FacultyName    *string `json:"faculty_name,omitempty"` // 系名称
+
+    // Student 扩展信息（学生 person_type=1）
+    StudentNo        string  `json:"student_no,omitempty"`
+    Grade            string  `json:"grade,omitempty"`
+    AreaID           *int    `json:"area_id,omitempty"`
+    EducationLevel   string  `json:"education_level,omitempty"`
+    SchoolSystem     string  `json:"school_system,omitempty"`
+    IDCard           string  `json:"id_card,omitempty"`
+    AdmissionNo      string  `json:"admission_no,omitempty"`
+    ExamNo           string  `json:"exam_no,omitempty"`
+    EnrollmentStatus *int    `json:"enrollment_status,omitempty"`
+    IsEnrolled       *int    `json:"is_enrolled,omitempty"`
+    ProfessionID     *int    `json:"profession_id,omitempty"`
+    ProfessionName   *string `json:"profession_name,omitempty"` // 专业名称
+    ClassID          *int    `json:"class_id,omitempty"`
+    ClassName        *string `json:"class_name,omitempty"` // 班级名称
+
+    // 权限信息
+    ManagedRoles []ManagedRole `json:"managed_roles"` // 管辖角色及机构
+    ManagedMenu  []int         `json:"managed_menu"`  // 菜单权限ID数组
+}
+```
+
+### 2.3 ManagedRole（管辖角色信息）
+
+```go
+// ManagedRole 管辖角色信息
+type ManagedRole struct {
+    ID          int                 `json:"id"`          // 角色ID
+    ParentID    int                 `json:"parent_id"`   // 上级角色组ID
+    ParentName  string              `json:"parent_name"` // 上级角色组名称
+    Name        string              `json:"name"`        // 角色名称
+    Departments []ManagedDepartment `json:"departments"` // 管辖机构列表
+}
+
+// ManagedDepartment 管辖机构信息
+type ManagedDepartment struct {
+    ID             int    `json:"id"`              // 机构ID
+    ParentID       int    `json:"parent_id"`       // 上级机构ID
+    DepartmentName string `json:"department_name"` // 机构名称
+    DepartmentType int    `json:"department_type"` // 机构类型：0=学校 1=行政机构 2=学院 3=系 4=专业 5=班级
+    Status         int    `json:"status"`          // 状态
+}
+```
+
+### 2.4 PersonsRole（管辖角色表）
+
+```go
+// PersonsRole 管辖角色
+type PersonsRole struct {
+    ID          int    `json:"id" db:"id"`
+    CustomerID  int    `json:"customer_id" db:"customer_id"`
+    ParentID    int    `json:"parent_id" db:"parent_id"`
+    Name        string `json:"name" db:"name"`
+    Permissions string `json:"permissions" db:"permissions"` // 菜单权限，逗号分隔的ID
+}
+```
+
+### 2.5 PersonHasDepartment（人员角色管辖机构关系）
+
+```go
+// PersonHasDepartment 人员角色管辖机构关系
+type PersonHasDepartment struct {
+    CustomerID     int `json:"customer_id" db:"customer_id"`
+    PersonsRolesID int `json:"persons_roles_id" db:"persons_roles_id"` // 角色ID
+    PersonID       int `json:"person_id" db:"person_id"`
+    DepartmentID   int `json:"department_id" db:"department_id"`       // 管辖机构ID
+}
+```
+
+### 2.6 PersonRole（人员角色关系）
+
+```go
+// PersonRole 人员角色关系
+type PersonRole struct {
+    CustomerID int `json:"customer_id" db:"customer_id"`
+    PersonID   int `json:"person_id" db:"person_id"`
+    RoleID     int `json:"role_id" db:"role_id"`
 }
 ```
 
@@ -65,35 +159,34 @@ type PersonDetail struct {
 
 ## 3. API 接口列表
 
-### 3.1 人员基础接口
+### 3.1 政工端接口（/api/staff）
 
-| 方法 | 路径 | 描述 | 权限 |
+| 方法 | 路径 | 描述 | 认证 |
 |------|------|------|------|
-| GET | /api/v1/persons/:id | 获取人员详情 | 需要权限 |
-| GET | /api/v1/persons | 获取人员列表 | 需要权限 |
-| POST | /api/v1/persons | 创建人员 | 管理员 |
-| PUT | /api/v1/persons/:id | 更新人员 | 管理员 |
-| DELETE | /api/v1/persons/:id | 删除人员（软删除） | 管理员 |
+| GET | /api/staff/info | 获取当前登录人员信息 | Bearer Token (学生/政工/维修工) |
+| GET | /api/staff/departments/tree | 获取管辖机构树 | Bearer Token |
+| GET | /api/staff/departments/list | 获取管辖机构列表 | Bearer Token |
+| GET | /api/staff/persons/list | 查询人员列表（带权限过滤） | Bearer Token |
 
-### 3.2 人员搜索接口
+### 3.2 学校后台接口（/api/base）
 
-| 方法 | 路径 | 描述 | 权限 |
+| 方法 | 路径 | 描述 | 认证 |
 |------|------|------|------|
-| GET | /api/v1/persons/search | 搜索人员（ES） | 需要权限 |
+| GET | /api/base/info | 获取当前登录学校管理员信息 | Bearer Token (学校管理员) |
+| GET | /api/base/departments/tree | 获取学校机构树 | Bearer Token |
+| GET | /api/base/departments/list | 获取学校机构列表 | Bearer Token |
+| GET | /api/base/persons/list | 查询人员列表（无权限过滤） | Bearer Token |
 
-### 3.3 人员角色管理接口
+### 3.3 接口说明
 
-| 方法 | 路径 | 描述 | 权限 |
-|------|------|------|------|
-| GET | /api/v1/persons/:id/roles | 获取人员的所有角色 | 需要权限 |
-| POST | /api/v1/persons/:id/roles | 为人员分配角色 | 管理员 |
-| DELETE | /api/v1/persons/:id/roles/:role_id | 移除人员角色 | 管理员 |
+#### 政工端 vs 学校后台
 
-### 3.4 人员机构查询接口
-
-| 方法 | 路径 | 描述 | 权限 |
-|------|------|------|------|
-| GET | /api/v1/persons/:id/departments | 获取人员所属机构 | 需要权限 |
+| 功能 | 政工端 (/api/staff) | 学校后台 (/api/base) |
+|------|---------------------|----------------------|
+| 登录用户 | 学生/政工/维修工 (persons表) | 学校管理员 (admin_users表) |
+| 机构查询 | 仅查看管辖权限下的机构 | 查看所有机构 |
+| 人员查询 | 仅查看管辖权限下的人员 | 查看所有人员 |
+| 权限来源 | persons_has_roles + persons_has_department | 无限制 |
 
 ---
 
@@ -378,3 +471,182 @@ DELETE /api/v1/persons/123
 
 ---
 
+
+
+---
+
+## 5. 人员登录信息接口
+
+### 5.1 获取当前登录人员信息
+
+**接口地址**：`GET /api/staff/info`
+
+**接口说明**：
+- 支持学生(person_type=1)、政工(person_type=2)、维修工(person_type=3)登录
+- 根据 person_type 返回不同的扩展字段
+- 返回管辖角色和菜单权限信息
+
+**请求参数**：无（通过 Token 获取 person_id）
+
+**请求示例**：
+```bash
+GET /api/staff/info
+Authorization: Bearer {token}
+```
+
+**响应示例（政工/维修工）**：
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "person_id": 1,
+    "person_type": 2,
+    "university_id": 1,
+    "university_name": "XX大学",
+    "name": "张三",
+    "gender": 1,
+    "mobile": "13800138000",
+    "email": "zhangsan@example.com",
+    "avatar": "https://example.com/avatar.jpg",
+    "status": 1,
+    "staff_no": "S001",
+    "department_id": 10,
+    "department_name": "学生处",
+    "college_id": 20,
+    "college_name": "计算机学院",
+    "faculty_id": 30,
+    "faculty_name": "软件工程系",
+    "managed_roles": [
+      {
+        "id": 1,
+        "parent_id": 0,
+        "parent_name": "",
+        "name": "辅导员",
+        "departments": [
+          {
+            "id": 55,
+            "parent_id": 20,
+            "department_name": "软件2024-1班",
+            "department_type": 5,
+            "status": 1
+          }
+        ]
+      }
+    ],
+    "managed_menu": [1, 2, 3, 4]
+  }
+}
+```
+
+**响应示例（学生）**：
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "person_id": 2,
+    "person_type": 1,
+    "university_id": 1,
+    "university_name": "XX大学",
+    "name": "李四",
+    "gender": 1,
+    "mobile": "13900139000",
+    "email": "lisi@example.com",
+    "avatar": "https://example.com/avatar2.jpg",
+    "status": 1,
+    "student_no": "2024001",
+    "grade": "2024",
+    "area_id": 1,
+    "education_level": "本科",
+    "school_system": "4年",
+    "id_card": "110101200001011234",
+    "admission_no": "A2024001",
+    "exam_no": "E2024001",
+    "enrollment_status": 1,
+    "is_enrolled": 1,
+    "college_id": 20,
+    "college_name": "计算机学院",
+    "faculty_id": 30,
+    "faculty_name": "软件工程系",
+    "profession_id": 40,
+    "profession_name": "软件工程",
+    "class_id": 55,
+    "class_name": "软件2024-1班",
+    "managed_roles": [],
+    "managed_menu": []
+  }
+}
+```
+
+**响应字段说明**：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| person_id | int | 人员ID |
+| person_type | int | 人员类型：1=学生 2=政工 3=维修工 |
+| university_id | int | 学校ID |
+| university_name | string | 学校名称 |
+| name | string | 姓名 |
+| gender | int | 性别：1=男 2=女 |
+| mobile | string | 手机号 |
+| email | string | 邮箱 |
+| avatar | string | 头像URL |
+| status | int | 状态：1=正常 2=禁用 |
+| staff_no | string | 工号（政工/维修工） |
+| department_id | int | 部门ID（政工/维修工） |
+| department_name | string | 部门名称（政工/维修工） |
+| college_id | int | 学院ID |
+| college_name | string | 学院名称 |
+| faculty_id | int | 系ID |
+| faculty_name | string | 系名称 |
+| student_no | string | 学号（学生） |
+| grade | string | 年级（学生） |
+| area_id | int | 校区ID（学生） |
+| education_level | string | 教育层次（学生） |
+| school_system | string | 学制（学生） |
+| id_card | string | 身份证号（学生） |
+| admission_no | string | 录取编号（学生） |
+| exam_no | string | 准考证号（学生） |
+| enrollment_status | int | 学籍状态（学生） |
+| is_enrolled | int | 是否报到（学生） |
+| profession_id | int | 专业ID（学生） |
+| profession_name | string | 专业名称（学生） |
+| class_id | int | 班级ID（学生） |
+| class_name | string | 班级名称（学生） |
+| managed_roles | array | 管辖角色列表 |
+| managed_menu | array | 菜单权限ID数组 |
+
+**managed_roles 字段说明**：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | int | 角色ID |
+| parent_id | int | 上级角色组ID |
+| parent_name | string | 上级角色组名称 |
+| name | string | 角色名称 |
+| departments | array | 管辖机构列表 |
+
+**departments 字段说明**：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | int | 机构ID |
+| parent_id | int | 上级机构ID |
+| department_name | string | 机构名称 |
+| department_type | int | 机构类型：0=学校 1=行政机构 2=学院 3=系 4=专业 5=班级 |
+| status | int | 状态 |
+
+**业务逻辑**：
+1. 从 Token 获取 person_id
+2. 查询 persons 表获取基础信息和 person_type
+3. 根据 person_type 查询扩展信息（students 或 staff 表）
+4. 查询 departments 表获取机构名称（学校、部门、学院、系、专业、班级）
+5. 查询 persons_has_roles 表获取人员角色
+6. 查询 persons_roles 表获取角色详情和菜单权限
+7. 查询 persons_has_department 表获取角色对应的管辖机构
+
+**注意事项**：
+- 机构名称直接从 departments 表查询，不依赖管辖权限
+- 学生登录时 managed_roles 和 managed_menu 可能为空
+- 政工/维修工的扩展字段使用 omitempty，学生的扩展字段也使用 

@@ -16,51 +16,23 @@ func NewPersonRepository(db *sql.DB) *PersonRepository {
 	return &PersonRepository{db: db}
 }
 
-// GetStaffInfo 获取政工完整信息
-func (r *PersonRepository) GetStaffInfo(personID int) (*model.StaffInfo, error) {
-	query := `
-        SELECT 
-            p.id as person_id,
-            p.person_type,
-            p.name,
-            p.gender,
-            p.mobile,
-            p.email,
-            p.avatar,
-            p.status,
-            s.staff_no,
-            s.university_id,
-            s.department_id,
-            s.college_id,
-            s.faculty_id
-        FROM persons p
-        LEFT JOIN staff s ON p.id = s.person_id
-        WHERE p.id = ? AND p.deleted_at = 0
+// GetPersonInfo 获取人员完整信息（根据person_type返回不同结构）
+func (r *PersonRepository) GetPersonInfo(personID int) (model.PersonInfo, error) {
+	baseQuery := `
+        SELECT id, customer_id, person_type, name, gender, mobile, email, avatar, status
+        FROM persons
+        WHERE id = ? AND deleted_at = 0
         LIMIT 1
     `
 
-	var info model.StaffInfo
+	var pID, universityID, personType, status int
+	var name string
 	var gender sql.NullInt64
-	var mobile, email, avatar, staffNo sql.NullString
-	var universityID sql.NullInt64
-	var departmentID, collegeID, facultyID sql.NullInt64
+	var mobile, email, avatar sql.NullString
 
-	err := r.db.QueryRow(query, personID).Scan(
-		&info.PersonID,
-		&info.PersonType,
-		&info.Name,
-		&gender,
-		&mobile,
-		&email,
-		&avatar,
-		&info.Status,
-		&staffNo,
-		&universityID,
-		&departmentID,
-		&collegeID,
-		&facultyID,
+	err := r.db.QueryRow(baseQuery, personID).Scan(
+		&pID, &universityID, &personType, &name, &gender, &mobile, &email, &avatar, &status,
 	)
-
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("person not found")
@@ -68,25 +40,155 @@ func (r *PersonRepository) GetStaffInfo(personID int) (*model.StaffInfo, error) 
 		return nil, err
 	}
 
-	// 处理可空字段
-	if gender.Valid {
-		g := int(gender.Int64)
-		info.Gender = &g
+	switch personType {
+	case 1: // 学生
+		info := &model.StudentPersonInfo{
+			PersonID:     pID,
+			PersonType:   personType,
+			UniversityID: universityID,
+			Name:         name,
+			Status:       status,
+		}
+		if gender.Valid {
+			g := int(gender.Int64)
+			info.Gender = &g
+		}
+		if mobile.Valid {
+			info.Mobile = mobile.String
+		}
+		if email.Valid {
+			info.Email = email.String
+		}
+		if avatar.Valid {
+			info.Avatar = avatar.String
+		}
+		r.fillStudentPersonInfo(info)
+		return info, nil
+
+	case 2, 3: // 政工、维修工
+		info := &model.StaffPersonInfo{
+			PersonID:     pID,
+			PersonType:   personType,
+			UniversityID: universityID,
+			Name:         name,
+			Status:       status,
+		}
+		if gender.Valid {
+			g := int(gender.Int64)
+			info.Gender = &g
+		}
+		if mobile.Valid {
+			info.Mobile = mobile.String
+		}
+		if email.Valid {
+			info.Email = email.String
+		}
+		if avatar.Valid {
+			info.Avatar = avatar.String
+		}
+		r.fillStaffPersonInfo(info)
+		return info, nil
+
+	default:
+		return nil, fmt.Errorf("unsupported person type: %d", personType)
 	}
-	if mobile.Valid {
-		info.Mobile = mobile.String
+}
+
+// fillStudentPersonInfo 填充学生扩展信息
+func (r *PersonRepository) fillStudentPersonInfo(info *model.StudentPersonInfo) {
+	query := `
+        SELECT student_no, grade, area_id, education_level, school_system,
+               id_card, admission_no, exam_no, enrollment_status, is_enrolled,
+               college_id, faculty_id, profession_id, class_id
+        FROM students
+        WHERE person_id = ?
+        LIMIT 1
+    `
+
+	var studentNo, grade, educationLevel, schoolSystem, idCard, admissionNo, examNo sql.NullString
+	var areaID, enrollmentStatus, isEnrolled, collegeID, facultyID, professionID, classID sql.NullInt64
+
+	err := r.db.QueryRow(query, info.PersonID).Scan(
+		&studentNo, &grade, &areaID, &educationLevel, &schoolSystem,
+		&idCard, &admissionNo, &examNo, &enrollmentStatus, &isEnrolled,
+		&collegeID, &facultyID, &professionID, &classID,
+	)
+	if err != nil {
+		return
 	}
-	if email.Valid {
-		info.Email = email.String
+
+	if studentNo.Valid {
+		info.StudentNo = studentNo.String
 	}
-	if avatar.Valid {
-		info.Avatar = avatar.String
+	if grade.Valid {
+		info.Grade = grade.String
 	}
+	if areaID.Valid {
+		a := int(areaID.Int64)
+		info.AreaID = &a
+	}
+	if educationLevel.Valid {
+		info.EducationLevel = educationLevel.String
+	}
+	if schoolSystem.Valid {
+		info.SchoolSystem = schoolSystem.String
+	}
+	if idCard.Valid {
+		info.IDCard = idCard.String
+	}
+	if admissionNo.Valid {
+		info.AdmissionNo = admissionNo.String
+	}
+	if examNo.Valid {
+		info.ExamNo = examNo.String
+	}
+	if enrollmentStatus.Valid {
+		e := int(enrollmentStatus.Int64)
+		info.EnrollmentStatus = &e
+	}
+	if isEnrolled.Valid {
+		i := int(isEnrolled.Int64)
+		info.IsEnrolled = &i
+	}
+	if collegeID.Valid {
+		c := int(collegeID.Int64)
+		info.CollegeID = &c
+	}
+	if facultyID.Valid {
+		f := int(facultyID.Int64)
+		info.FacultyID = &f
+	}
+	if professionID.Valid {
+		p := int(professionID.Int64)
+		info.ProfessionID = &p
+	}
+	if classID.Valid {
+		c := int(classID.Int64)
+		info.ClassID = &c
+	}
+}
+
+// fillStaffPersonInfo 填充政工/维修工扩展信息
+func (r *PersonRepository) fillStaffPersonInfo(info *model.StaffPersonInfo) {
+	query := `
+        SELECT staff_no, department_id, college_id, faculty_id
+        FROM staff
+        WHERE person_id = ?
+        LIMIT 1
+    `
+
+	var staffNo sql.NullString
+	var departmentID, collegeID, facultyID sql.NullInt64
+
+	err := r.db.QueryRow(query, info.PersonID).Scan(
+		&staffNo, &departmentID, &collegeID, &facultyID,
+	)
+	if err != nil {
+		return
+	}
+
 	if staffNo.Valid {
 		info.StaffNo = staffNo.String
-	}
-	if universityID.Valid {
-		info.UniversityID = int(universityID.Int64)
 	}
 	if departmentID.Valid {
 		d := int(departmentID.Int64)
@@ -100,14 +202,23 @@ func (r *PersonRepository) GetStaffInfo(personID int) (*model.StaffInfo, error) 
 		f := int(facultyID.Int64)
 		info.FacultyID = &f
 	}
+}
 
-	return &info, nil
+// GetStaffInfo 获取政工完整信息 (兼容旧接口)
+func (r *PersonRepository) GetStaffInfo(personID int) (*model.StaffPersonInfo, error) {
+	info, err := r.GetPersonInfo(personID)
+	if err != nil {
+		return nil, err
+	}
+	if staffInfo, ok := info.(*model.StaffPersonInfo); ok {
+		return staffInfo, nil
+	}
+	return nil, fmt.Errorf("person is not staff type")
 }
 
 // GetDepartmentName 获取部门名称
 func (r *PersonRepository) GetDepartmentName(deptID int) (string, error) {
 	query := `SELECT department_name FROM departments WHERE id = ? AND deleted_at = 0 LIMIT 1`
-
 	var name string
 	err := r.db.QueryRow(query, deptID).Scan(&name)
 	if err != nil {
@@ -116,47 +227,28 @@ func (r *PersonRepository) GetDepartmentName(deptID int) (string, error) {
 		}
 		return "", err
 	}
-
 	return name, nil
 }
 
 // GetAdminUserInfo 获取学校管理员信息
 func (r *PersonRepository) GetAdminUserInfo(userID int) (*model.AdminUserInfo, error) {
 	query := `
-        SELECT 
-            id,
-            username,
-            email,
-            mobile,
-            avatar,
-            customer_id,
-            status
+        SELECT id, username, email, mobile, avatar, customer_id, status
         FROM admin_users
         WHERE id = ? AND deleted_at = 0
         LIMIT 1
     `
-
 	var info model.AdminUserInfo
 	var email, mobile, avatar sql.NullString
-
 	err := r.db.QueryRow(query, userID).Scan(
-		&info.UserID,
-		&info.Username,
-		&email,
-		&mobile,
-		&avatar,
-		&info.UniversityID,
-		&info.Status,
+		&info.UserID, &info.Username, &email, &mobile, &avatar, &info.UniversityID, &info.Status,
 	)
-
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("admin user not found")
 		}
 		return nil, err
 	}
-
-	// 处理可空字段
 	if email.Valid {
 		info.Email = email.String
 	}
@@ -172,7 +264,6 @@ func (r *PersonRepository) GetAdminUserInfo(userID int) (*model.AdminUserInfo, e
 
 // GetPersonList 查询人员列表（基础信息）
 func (r *PersonRepository) GetPersonList(req *model.PersonListRequest, visibleDeptIDs, managedPersonIDs []int, isStaff bool) ([]model.PersonWithExtend, int64, error) {
-	// 构建基础查询
 	baseQuery := `
         SELECT p.id, p.customer_id, p.person_type, p.name, p.gender, 
                p.mobile, p.email, p.avatar, p.status
@@ -182,7 +273,6 @@ func (r *PersonRepository) GetPersonList(req *model.PersonListRequest, visibleDe
 
 	args := []interface{}{req.UniversityID, req.PersonType}
 
-	// 添加权限过滤（政工人员）
 	if isStaff {
 		baseQuery += r.buildPermissionFilter(req.PersonType, len(visibleDeptIDs), len(managedPersonIDs))
 		if len(managedPersonIDs) > 0 {
@@ -191,12 +281,12 @@ func (r *PersonRepository) GetPersonList(req *model.PersonListRequest, visibleDe
 			}
 		}
 		if len(visibleDeptIDs) > 0 {
-			for i := 0; i < 4; i++ { // 学生有4个部门字段
+			for i := 0; i < 4; i++ {
 				for _, id := range visibleDeptIDs {
 					args = append(args, id)
 				}
 			}
-			if req.PersonType == 2 { // 政工有3个部门字段
+			if req.PersonType == 2 {
 				for i := 0; i < 3; i++ {
 					for _, id := range visibleDeptIDs {
 						args = append(args, id)
@@ -206,13 +296,9 @@ func (r *PersonRepository) GetPersonList(req *model.PersonListRequest, visibleDe
 		}
 	}
 
-	// 添加基础字段搜索条件
 	baseQuery, args = r.addBasicFilters(baseQuery, args, req)
-
-	// 添加扩展字段搜索条件
 	baseQuery, args = r.addExtendFilters(baseQuery, args, req)
 
-	// 获取总数
 	countQuery := "SELECT COUNT(*) FROM (" + baseQuery + ") AS t"
 	var total int64
 	err := r.db.QueryRow(countQuery, args...).Scan(&total)
@@ -220,7 +306,6 @@ func (r *PersonRepository) GetPersonList(req *model.PersonListRequest, visibleDe
 		return nil, 0, fmt.Errorf("failed to count persons: %w", err)
 	}
 
-	// 分页查询
 	baseQuery += " ORDER BY p.id DESC LIMIT ? OFFSET ?"
 	offset := (req.Page - 1) * req.PageSize
 	args = append(args, req.PageSize, offset)
@@ -263,10 +348,9 @@ func (r *PersonRepository) GetPersonList(req *model.PersonListRequest, visibleDe
 	return persons, total, nil
 }
 
-// buildPermissionFilter 构建权限过滤条件
 func (r *PersonRepository) buildPermissionFilter(personType int, deptCount, personCount int) string {
 	if personCount == 0 && deptCount == 0 {
-		return " AND 1=0" // 无权限
+		return " AND 1=0"
 	}
 
 	filter := " AND ("
@@ -292,14 +376,14 @@ func (r *PersonRepository) buildPermissionFilter(personType int, deptCount, pers
 			deptPlaceholders += "?"
 		}
 
-		if personType == 1 { // 学生
+		if personType == 1 {
 			conditions = append(conditions, fmt.Sprintf(`EXISTS (
                 SELECT 1 FROM students s
                 WHERE s.person_id = p.id
                   AND (s.college_id IN (%s) OR s.faculty_id IN (%s) 
                        OR s.profession_id IN (%s) OR s.class_id IN (%s))
             )`, deptPlaceholders, deptPlaceholders, deptPlaceholders, deptPlaceholders))
-		} else if personType == 2 { // 政工
+		} else if personType == 2 {
 			conditions = append(conditions, fmt.Sprintf(`EXISTS (
                 SELECT 1 FROM staff st
                 WHERE st.person_id = p.id
@@ -319,7 +403,6 @@ func (r *PersonRepository) buildPermissionFilter(personType int, deptCount, pers
 	return filter
 }
 
-// addBasicFilters 添加基础字段过滤条件
 func (r *PersonRepository) addBasicFilters(query string, args []interface{}, req *model.PersonListRequest) (string, []interface{}) {
 	if req.Name != "" {
 		query += " AND p.name LIKE ?"
@@ -344,7 +427,6 @@ func (r *PersonRepository) addBasicFilters(query string, args []interface{}, req
 	return query, args
 }
 
-// addExtendFilters 添加扩展字段过滤条件
 func (r *PersonRepository) addExtendFilters(query string, args []interface{}, req *model.PersonListRequest) (string, []interface{}) {
 	if req.PersonType == 1 {
 		return r.addStudentFilters(query, args, req)
@@ -354,7 +436,6 @@ func (r *PersonRepository) addExtendFilters(query string, args []interface{}, re
 	return query, args
 }
 
-// addStudentFilters 添加学生扩展字段过滤
 func (r *PersonRepository) addStudentFilters(query string, args []interface{}, req *model.PersonListRequest) (string, []interface{}) {
 	conditions := []string{}
 	studentArgs := []interface{}{}
@@ -429,7 +510,6 @@ func (r *PersonRepository) addStudentFilters(query string, args []interface{}, r
 	return query, args
 }
 
-// addStaffFilters 添加政工扩展字段过滤
 func (r *PersonRepository) addStaffFilters(query string, args []interface{}, req *model.PersonListRequest) (string, []interface{}) {
 	conditions := []string{}
 	staffArgs := []interface{}{}
@@ -488,9 +568,6 @@ func (r *PersonRepository) GetStudentExtendInfo(personIDs []int, req *model.Pers
 	}
 	query += ")"
 
-	// 添加过滤条件
-	query, args = r.addStudentExtendFilters(query, args, req)
-
 	rows, err := r.db.Query(query, args...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query student extend info: %w", err)
@@ -529,67 +606,6 @@ func (r *PersonRepository) GetStudentExtendInfo(personIDs []int, req *model.Pers
 	return extendMap, nil
 }
 
-// addStudentExtendFilters 添加学生扩展信息查询的过滤条件
-func (r *PersonRepository) addStudentExtendFilters(query string, args []interface{}, req *model.PersonListRequest) (string, []interface{}) {
-	if req.StudentNo != "" {
-		query += " AND student_no LIKE ?"
-		args = append(args, "%"+req.StudentNo+"%")
-	}
-	if req.AreaID != nil {
-		query += " AND area_id = ?"
-		args = append(args, *req.AreaID)
-	}
-	if req.Grade != "" {
-		query += " AND grade = ?"
-		args = append(args, req.Grade)
-	}
-	if req.EducationLevel != "" {
-		query += " AND education_level = ?"
-		args = append(args, req.EducationLevel)
-	}
-	if req.SchoolSystem != "" {
-		query += " AND school_system = ?"
-		args = append(args, req.SchoolSystem)
-	}
-	if req.IDCard != "" {
-		query += " AND id_card = ?"
-		args = append(args, req.IDCard)
-	}
-	if req.AdmissionNo != "" {
-		query += " AND admission_no = ?"
-		args = append(args, req.AdmissionNo)
-	}
-	if req.ExamNo != "" {
-		query += " AND exam_no = ?"
-		args = append(args, req.ExamNo)
-	}
-	if req.EnrollmentStatus != nil {
-		query += " AND enrollment_status = ?"
-		args = append(args, *req.EnrollmentStatus)
-	}
-	if req.IsEnrolled != nil {
-		query += " AND is_enrolled = ?"
-		args = append(args, *req.IsEnrolled)
-	}
-	if req.CollegeID != nil {
-		query += " AND college_id = ?"
-		args = append(args, *req.CollegeID)
-	}
-	if req.FacultyID != nil {
-		query += " AND faculty_id = ?"
-		args = append(args, *req.FacultyID)
-	}
-	if req.ProfessionID != nil {
-		query += " AND profession_id = ?"
-		args = append(args, *req.ProfessionID)
-	}
-	if req.ClassID != nil {
-		query += " AND class_id = ?"
-		args = append(args, *req.ClassID)
-	}
-	return query, args
-}
-
 // GetStaffExtendInfo 批量查询政工扩展信息
 func (r *PersonRepository) GetStaffExtendInfo(personIDs []int, req *model.PersonListRequest) (map[int]*model.StaffExtend, error) {
 	if len(personIDs) == 0 {
@@ -610,9 +626,6 @@ func (r *PersonRepository) GetStaffExtendInfo(personIDs []int, req *model.Person
 		args = append(args, id)
 	}
 	query += ")"
-
-	// 添加过滤条件
-	query, args = r.addStaffExtendFilters(query, args, req)
 
 	rows, err := r.db.Query(query, args...)
 	if err != nil {
@@ -647,25 +660,4 @@ func (r *PersonRepository) GetStaffExtendInfo(personIDs []int, req *model.Person
 	}
 
 	return extendMap, nil
-}
-
-// addStaffExtendFilters 添加政工扩展信息查询的过滤条件
-func (r *PersonRepository) addStaffExtendFilters(query string, args []interface{}, req *model.PersonListRequest) (string, []interface{}) {
-	if req.StaffNo != "" {
-		query += " AND staff_no LIKE ?"
-		args = append(args, "%"+req.StaffNo+"%")
-	}
-	if req.DepartmentID != nil {
-		query += " AND department_id = ?"
-		args = append(args, *req.DepartmentID)
-	}
-	if req.CollegeID != nil {
-		query += " AND college_id = ?"
-		args = append(args, *req.CollegeID)
-	}
-	if req.FacultyID != nil {
-		query += " AND faculty_id = ?"
-		args = append(args, *req.FacultyID)
-	}
-	return query, args
 }

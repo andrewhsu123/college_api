@@ -20,8 +20,8 @@ SET FOREIGN_KEY_CHECKS=0;
 -- ----------------------------
 DROP TABLE IF EXISTS `persons_has_department`;
 CREATE TABLE `persons_has_department` (
+  `customer_id` int(10) unsigned NOT NULL COMMENT '客户ID(学校ID)',
+  `persons_roles_id` int(11) NOT NULL,
   `person_id` int(11) NOT NULL COMMENT '人员ID',
-  `department_id` int(11) NOT NULL COMMENT '部门ID',
-  KEY `idx_person_id` (`person_id`),
-  KEY `idx_department_id` (`department_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='人员直接关联部门权限';
+  `department_id` int(11) NOT NULL COMMENT '管辖机构ID'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户管辖机构';

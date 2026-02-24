@@ -215,6 +215,7 @@
             <button class="tab-button active" onclick="showTab('auth')">认证接口</button>
             <button class="tab-button" onclick="showTab('dept')">机构接口</button>
             <button class="tab-button" onclick="showTab('person')">人员接口</button>
+            <button class="tab-button" onclick="showTab('open')">开放接口</button>
         </div>
 
         <!-- 认证接口 -->
@@ -1014,6 +1015,659 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</pre>
                 
                 <div class="info-box">
                     <strong>提示：</strong>返回的人员数量取决于政工人员的管辖权限，total 表示该政工人员可见的总人员数。
+                </div>
+            </div>
+        </div>
+
+
+        <!-- 开放接口 -->
+        <div id="open" class="tab-content">
+            <div class="info-box">
+                <strong>认证说明：</strong>开放接口使用秘钥认证，需要在请求头中携带 Authorization 参数，值为 [Bearer f92968afc12903b4e22dfb0d2a8d9823100da266]
+            </div>
+
+            <div class="api-section">
+                <h2 class="api-title">9. 获取应用列表</h2>
+                <div>
+                    <span class="method-badge method-get">GET</span>
+                    <span class="endpoint">/api/open/applications/list</span>
+                </div>
+                
+                <div class="section-title">请求头</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Authorization</td>
+                            <td>string</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>OPEN_KEY 秘钥</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="section-title">请求参数</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>customer_id</td>
+                            <td>int</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>学校ID</td>
+                        </tr>
+                        <tr>
+                            <td>app_code</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>应用编码</td>
+                        </tr>
+                        <tr>
+                            <td>app_name</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>应用名称（模糊查询）</td>
+                        </tr>
+                        <tr>
+                            <td>short_intro</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>简介（模糊查询）</td>
+                        </tr>
+                        <tr>
+                            <td>data_type</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>数据类型：1=可见所有人数据 2=管辖范围下数据</td>
+                        </tr>
+                        <tr>
+                            <td>status</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>状态：1=已启用 2=已停用</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="section-title">请求示例</div>
+                <div class="code-block">
+<pre>GET /api/open/applications/list?customer_id=1
+Authorization: your_open_key_here</pre>
+                </div>
+
+                <div class="section-title">响应示例</div>
+                <div class="code-block">
+<pre>{
+  "code": 0,
+  "message": "success",
+  "data": [
+    {
+      "app_code": "student_manage",
+      "app_name": "学生管理系统",
+      "app_url": "https://example.com/student",
+      "short_intro": "学生信息管理",
+      "description": "用于管理学生基本信息、学籍等",
+      "icon": "https://example.com/icons/student.png",
+      "data_type": 1,
+      "status": 1,
+      "created_at": 1700000000
+    }
+  ]
+}</pre>
+                </div>
+            </div>
+
+
+            <div class="api-section">
+                <h2 class="api-title">10. 获取可见应用</h2>
+                <div>
+                    <span class="method-badge method-get">GET</span>
+                    <span class="endpoint">/api/open/applications/visible</span>
+                </div>
+                
+                <div class="section-title">请求头</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Authorization</td>
+                            <td>string</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>OPEN_KEY 秘钥</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="section-title">请求参数</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>customer_id</td>
+                            <td>int</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>学校ID</td>
+                        </tr>
+                        <tr>
+                            <td>person_id</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>人员ID</td>
+                        </tr>
+                        <tr>
+                            <td>person_type</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>人员类型：1=学生 2=政工</td>
+                        </tr>
+                        <tr>
+                            <td>role_ids</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>角色ID列表（逗号分隔）</td>
+                        </tr>
+                        <tr>
+                            <td>department_ids</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>部门ID列表（逗号分隔）</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="info-box">
+                    <strong>可见性判断逻辑：</strong>
+                    <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                        <li>range_type=1：全部人员可见</li>
+                        <li>range_type=2：学生可见（person_type=1）</li>
+                        <li>range_type=3：政工可见（person_type=2）</li>
+                        <li>range_type=4：指定角色可见（role_ids 有交集）</li>
+                        <li>range_type=5：指定部门可见（department_ids 有交集）</li>
+                    </ul>
+                </div>
+
+                <div class="section-title">请求示例</div>
+                <div class="code-block">
+<pre>GET /api/open/applications/visible?customer_id=1&person_id=9&person_type=2&role_ids=1,2,8&department_ids=61,62
+Authorization: your_open_key_here</pre>
+                </div>
+
+                <div class="section-title">响应示例</div>
+                <div class="code-block">
+<pre>{
+  "code": 0,
+  "message": "success",
+  "data": [
+    {
+      "app_code": "staff_manage",
+      "app_name": "政工管理系统",
+      "app_url": "https://example.com/staff",
+      "short_intro": "政工人员管理",
+      "description": "用于管理政工人员信息",
+      "icon": "https://example.com/icons/staff.png",
+      "data_type": 2,
+      "status": 1,
+      "created_at": 1700000000
+    }
+  ]
+}</pre>
+                </div>
+            </div>
+
+
+            <div class="api-section">
+                <h2 class="api-title">11. 查询政工列表</h2>
+                <div>
+                    <span class="method-badge method-get">GET</span>
+                    <span class="endpoint">/api/open/staff/list</span>
+                </div>
+                
+                <div class="section-title">请求头</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Authorization</td>
+                            <td>string</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>OPEN_KEY 秘钥</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="section-title">请求参数</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>university_id</td>
+                            <td>int</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>学校ID</td>
+                        </tr>
+                        <tr>
+                            <td>person_id</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>人员ID（支持逗号分隔多个）</td>
+                        </tr>
+                        <tr>
+                            <td>name</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>姓名（支持逗号分隔多个，模糊查询）</td>
+                        </tr>
+                        <tr>
+                            <td>staff_no</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>工号（支持逗号分隔多个）</td>
+                        </tr>
+                        <tr>
+                            <td>department_id</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>部门ID</td>
+                        </tr>
+                        <tr>
+                            <td>college_id</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>学院ID</td>
+                        </tr>
+                        <tr>
+                            <td>faculty_id</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>系ID</td>
+                        </tr>
+                        <tr>
+                            <td>with_contact</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>是否显示联系方式：1=显示手机、邮箱、性别、状态</td>
+                        </tr>
+                        <tr>
+                            <td>page</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>页码（默认1）</td>
+                        </tr>
+                        <tr>
+                            <td>page_size</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>每页数量（默认20，最大1000）</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="section-title">请求示例</div>
+                <div class="code-block">
+<pre>GET /api/open/staff/list?university_id=1&with_contact=1&page=1&page_size=20
+Authorization: your_open_key_here</pre>
+                </div>
+
+                <div class="section-title">响应示例</div>
+                <div class="code-block">
+<pre>{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "items": [
+      {
+        "person_id": 38,
+        "name": "王五",
+        "staff_no": "S001",
+        "department_id": 5,
+        "college_id": 10,
+        "faculty_id": null,
+        "mobile": "13900139000",
+        "email": "wangwu@example.com",
+        "gender": 1,
+        "status": 1
+      }
+    ],
+    "total": 50,
+    "page": 1,
+    "page_size": 20
+  }
+}</pre>
+                </div>
+            </div>
+
+
+            <div class="api-section">
+                <h2 class="api-title">12. 查询学生列表</h2>
+                <div>
+                    <span class="method-badge method-get">GET</span>
+                    <span class="endpoint">/api/open/students/list</span>
+                </div>
+                
+                <div class="section-title">请求头</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Authorization</td>
+                            <td>string</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>OPEN_KEY 秘钥</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="section-title">请求参数</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>university_id</td>
+                            <td>int</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>学校ID</td>
+                        </tr>
+                        <tr>
+                            <td>person_id</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>人员ID（支持逗号分隔多个）</td>
+                        </tr>
+                        <tr>
+                            <td>name</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>姓名（支持逗号分隔多个，模糊查询）</td>
+                        </tr>
+                        <tr>
+                            <td>student_no</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>学号（支持逗号分隔多个）</td>
+                        </tr>
+                        <tr>
+                            <td>area_id</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>校区ID</td>
+                        </tr>
+                        <tr>
+                            <td>grade</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>年级</td>
+                        </tr>
+                        <tr>
+                            <td>education_level</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>教育层次</td>
+                        </tr>
+                        <tr>
+                            <td>school_system</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>学制</td>
+                        </tr>
+                        <tr>
+                            <td>id_card</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>身份证号</td>
+                        </tr>
+                        <tr>
+                            <td>admission_no</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>录取编号</td>
+                        </tr>
+                        <tr>
+                            <td>exam_no</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>准考证号</td>
+                        </tr>
+                        <tr>
+                            <td>enrollment_status</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>学籍状态：1=在读 2=休学 3=毕业 4=退学 5=停学 6=复学 7=未报到 8=结业 9=肄业 10=转学 11=死亡 12=开除 13=参军 14=保留学籍 15=其他</td>
+                        </tr>
+                        <tr>
+                            <td>is_enrolled</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>报到状态：1=已报到 2=未报到</td>
+                        </tr>
+                        <tr>
+                            <td>college_id</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>学院ID</td>
+                        </tr>
+                        <tr>
+                            <td>faculty_id</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>系ID</td>
+                        </tr>
+                        <tr>
+                            <td>profession_id</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>专业ID</td>
+                        </tr>
+                        <tr>
+                            <td>class_id</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>班级ID</td>
+                        </tr>
+                        <tr>
+                            <td>with_contact</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>是否显示联系方式：1=显示手机、邮箱、性别、状态</td>
+                        </tr>
+                        <tr>
+                            <td>page</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>页码（默认1）</td>
+                        </tr>
+                        <tr>
+                            <td>page_size</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>每页数量（默认20，最大1000）</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="section-title">请求示例</div>
+                <div class="code-block">
+<pre>GET /api/open/students/list?university_id=1&grade=2023&with_contact=1&page=1&page_size=20
+Authorization: your_open_key_here</pre>
+                </div>
+
+                <div class="section-title">响应示例</div>
+                <div class="code-block">
+<pre>{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "items": [
+      {
+        "person_id": 10,
+        "name": "张三",
+        "student_no": "2023001",
+        "area_id": 1,
+        "grade": "2023",
+        "education_level": "本科",
+        "school_system": "4年",
+        "id_card": "110101200501011234",
+        "admission_no": "A2023001",
+        "exam_no": "E2023001",
+        "enrollment_status": 1,
+        "is_enrolled": 1,
+        "college_id": 10,
+        "faculty_id": 11,
+        "profession_id": 12,
+        "class_id": 13,
+        "mobile": "13800138000",
+        "email": "zhangsan@example.com",
+        "gender": 1,
+        "status": 1
+      }
+    ],
+    "total": 500,
+    "page": 1,
+    "page_size": 20
+  }
+}</pre>
+                </div>
+            </div>
+
+
+            <div class="api-section">
+                <h2 class="api-title">13. 查询角色列表</h2>
+                <div>
+                    <span class="method-badge method-get">GET</span>
+                    <span class="endpoint">/api/open/roles/list</span>
+                </div>
+                
+                <div class="section-title">请求头</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Authorization</td>
+                            <td>string</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>OPEN_KEY 秘钥</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="section-title">请求参数</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>university_id</td>
+                            <td>int</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>学校ID</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="section-title">请求示例</div>
+                <div class="code-block">
+<pre>GET /api/open/roles/list?university_id=1
+Authorization: your_open_key_here</pre>
+                </div>
+
+                <div class="section-title">响应示例</div>
+                <div class="code-block">
+<pre>{
+  "code": 0,
+  "message": "success",
+  "data": [
+    {
+      "id": 1,
+      "parent_id": 0,
+      "name": "超级管理员",
+      "permissions": "1,2,3,4,5"
+    },
+    {
+      "id": 2,
+      "parent_id": 1,
+      "name": "学院管理员",
+      "permissions": "1,2,3"
+    },
+    {
+      "id": 8,
+      "parent_id": 1,
+      "name": "辅导员",
+      "permissions": "1,2"
+    }
+  ]
+}</pre>
+                </div>
+
+                <div class="info-box">
+                    <strong>说明：</strong>permissions 字段为逗号分隔的菜单ID列表，表示该角色拥有的菜单权限。
                 </div>
             </div>
         </div>

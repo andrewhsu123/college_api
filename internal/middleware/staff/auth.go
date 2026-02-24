@@ -145,7 +145,7 @@ func (m *AuthMiddleware) validateToken(plainToken string) (int64, int, error) {
 		return 0, 0, fmt.Errorf("Token已过期")
 	}
 
-	// 验证person是否存在且为政工类型
+	// 验证person是否存在且状态正常（支持学生、政工、维修工）
 	var personType int
 	var status int
 	var customerID int
@@ -168,10 +168,9 @@ func (m *AuthMiddleware) validateToken(plainToken string) (int64, int, error) {
 
 	fmt.Printf("[STAFF DEBUG] Person信息 - Type: %d, Status: %d, CustomerID: %d\n", personType, status, customerID)
 
-	// 验证是否为政工类型 (person_type = 2)
-	if personType != 2 {
-		fmt.Printf("[STAFF DEBUG] Person类型不匹配，期望: 2(政工), 实际: %d\n", personType)
-		return 0, 0, fmt.Errorf("无权限访问: 此账号不是政工类型")
+	// 验证是否为有效的人员类型 (1=学生, 2=政工, 3=维修工)
+	if personType < 1 || personType > 3 {
+		return 0, 0, fmt.Errorf("无权限访问: 无效的人员类型")
 	}
 
 	// 验证用户状态

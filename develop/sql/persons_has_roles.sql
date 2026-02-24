@@ -20,6 +20,7 @@ SET FOREIGN_KEY_CHECKS=0;
 -- ----------------------------
 DROP TABLE IF EXISTS `persons_has_roles`;
 CREATE TABLE `persons_has_roles` (
+  `customer_id` int(10) unsigned NOT NULL COMMENT '客户ID(学校ID)',
   `person_id` int(11) NOT NULL COMMENT '人员ID',
   `role_id` int(11) NOT NULL COMMENT '角色ID'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户角色';

@@ -4,6 +4,8 @@ import (
 	"college_api/internal/model"
 	"college_api/internal/repository"
 	"fmt"
+	"strconv"
+	"strings"
 )
 
 // PersonService 人员业务逻辑层
@@ -20,141 +22,189 @@ func NewPersonService(repo *repository.PersonRepository, deptRepo *repository.De
 	}
 }
 
-// GetStaffInfo 获取政工完整信息
-func (s *PersonService) GetStaffInfo(personID int) (*model.StaffInfo, error) {
-	info, err := s.repo.GetStaffInfo(personID)
+// GetStaffInfo 获取人员完整信息（支持学生、政工、维修工）
+func (s *PersonService) GetStaffInfo(personID int) (model.PersonInfo, error) {
+	info, err := s.repo.GetPersonInfo(personID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get staff info: %w", err)
+		return nil, fmt.Errorf("failed to get person info: %w", err)
 	}
-
-	// 获取机构名称
-	if err := s.fillDepartmentNames(info); err != nil {
-		fmt.Printf("[WARN] Failed to fill department names for person %d: %v\n", personID, err)
-	}
-
-	// 获取管辖的机构ID列表（包含子机构）
-	managedDeptIDs, err := s.getManagedDepartmentIDs(info.UniversityID, personID)
+	// 填充机构名称
+	s.fillDepartmentNames(info)
+	// 获取管辖角色和机构信息
+	managedRoles, err := s.getManagedRoles(info.GetUniversityID(), personID)
 	if err != nil {
-		// 如果获取失败，记录错误但不影响主流程，返回空数组
-		fmt.Printf("[WARN] Failed to get managed department IDs for person %d: %v\n", personID, err)
-		info.ManagedDepartmentIDs = []int{}
-	} else {
-		info.ManagedDepartmentIDs = managedDeptIDs
+		fmt.Printf("[WARN] Failed to get managed roles for person %d: %v\n", personID, err)
+		managedRoles = []model.ManagedRole{}
 	}
+	info.SetManagedRoles(managedRoles)
 
-	// 获取管辖的人员ID列表
-	managedPersonIDs, err := s.getManagedPersonIDs(info.UniversityID, personID)
+	// 获取菜单权限
+	managedMenu, err := s.getManagedMenu(info.GetUniversityID(), personID)
 	if err != nil {
-		// 如果获取失败，记录错误但不影响主流程，返回空数组
-		fmt.Printf("[WARN] Failed to get managed person IDs for person %d: %v\n", personID, err)
-		info.ManagedPersonIDs = []int{}
-	} else {
-		info.ManagedPersonIDs = managedPersonIDs
+		fmt.Printf("[WARN] Failed to get managed menu for person %d: %v\n", personID, err)
+		managedMenu = []int{}
 	}
+	info.SetManagedMenu(managedMenu)
 
 	return info, nil
 }
 
 // fillDepartmentNames 填充机构名称
-func (s *PersonService) fillDepartmentNames(info *model.StaffInfo) error {
-	// 获取大学名称
-	if info.UniversityID > 0 {
-		name, err := s.repo.GetDepartmentName(info.UniversityID)
+func (s *PersonService) fillDepartmentNames(info model.PersonInfo) {
+	// 获取学校名称
+	if info.GetUniversityID() > 0 {
+		name, err := s.repo.GetDepartmentName(info.GetUniversityID())
 		if err == nil {
-			info.UniversityName = name
+			info.SetUniversityName(name)
 		}
 	}
 
-	// 获取部门名称
-	if info.DepartmentID != nil && *info.DepartmentID > 0 {
-		name, err := s.repo.GetDepartmentName(*info.DepartmentID)
-		if err == nil {
-			info.DepartmentName = &name
-		}
+	// 根据具体类型填充不同的机构名称
+	switch v := info.(type) {
+	case *model.StudentPersonInfo:
+		s.fillStudentDepartmentNames(v)
+	case *model.StaffPersonInfo:
+		s.fillStaffDepartmentNames(v)
 	}
+}
 
-	// 获取学院名称
+// fillStudentDepartmentNames 填充学生机构名称
+func (s *PersonService) fillStudentDepartmentNames(info *model.StudentPersonInfo) {
 	if info.CollegeID != nil && *info.CollegeID > 0 {
 		name, err := s.repo.GetDepartmentName(*info.CollegeID)
 		if err == nil {
 			info.CollegeName = &name
 		}
 	}
-
-	// 获取系名称
 	if info.FacultyID != nil && *info.FacultyID > 0 {
 		name, err := s.repo.GetDepartmentName(*info.FacultyID)
 		if err == nil {
 			info.FacultyName = &name
 		}
 	}
-
-	return nil
+	if info.ProfessionID != nil && *info.ProfessionID > 0 {
+		name, err := s.repo.GetDepartmentName(*info.ProfessionID)
+		if err == nil {
+			info.ProfessionName = &name
+		}
+	}
+	if info.ClassID != nil && *info.ClassID > 0 {
+		name, err := s.repo.GetDepartmentName(*info.ClassID)
+		if err == nil {
+			info.ClassName = &name
+		}
+	}
 }
 
-// getManagedDepartmentIDs 获取政工人员管辖的机构ID列表（包含子机构）
-func (s *PersonService) getManagedDepartmentIDs(customerID, personID int) ([]int, error) {
-	// 1. 获取政工人员的所有角色
-	roleIDs, err := s.deptRepo.GetStaffRoleIDs(personID)
+// fillStaffDepartmentNames 填充政工机构名称
+func (s *PersonService) fillStaffDepartmentNames(info *model.StaffPersonInfo) {
+	if info.DepartmentID != nil && *info.DepartmentID > 0 {
+		name, err := s.repo.GetDepartmentName(*info.DepartmentID)
+		if err == nil {
+			info.DepartmentName = &name
+		}
+	}
+	if info.CollegeID != nil && *info.CollegeID > 0 {
+		name, err := s.repo.GetDepartmentName(*info.CollegeID)
+		if err == nil {
+			info.CollegeName = &name
+		}
+	}
+	if info.FacultyID != nil && *info.FacultyID > 0 {
+		name, err := s.repo.GetDepartmentName(*info.FacultyID)
+		if err == nil {
+			info.FacultyName = &name
+		}
+	}
+}
+
+// getManagedRoles 获取人员的管辖角色及机构列表
+func (s *PersonService) getManagedRoles(customerID, personID int) ([]model.ManagedRole, error) {
+	roles, err := s.deptRepo.GetPersonRoles(customerID, personID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get staff role ids: %w", err)
+		return nil, fmt.Errorf("failed to get person roles: %w", err)
 	}
-	// 2. 合并两个来源的部门权限
-	authorizedDeptIDMap := make(map[int]bool)
-	// 2.1 获取角色关联的部门权限
-	if len(roleIDs) > 0 {
-		roleDeptIDs, err := s.deptRepo.GetRoleDepartmentIDs(customerID, roleIDs)
+
+	if len(roles) == 0 {
+		return []model.ManagedRole{}, nil
+	}
+
+	managedRoles := make([]model.ManagedRole, 0, len(roles))
+	for _, role := range roles {
+		parentName, _ := s.deptRepo.GetRoleParentName(customerID, role.ParentID)
+
+		departments, err := s.deptRepo.GetRoleManagedDepartments(customerID, personID, role.ID)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get role department ids: %w", err)
+			fmt.Printf("[WARN] Failed to get managed departments for role %d: %v\n", role.ID, err)
+			departments = []model.ManagedDepartment{}
 		}
-		for _, id := range roleDeptIDs {
-			authorizedDeptIDMap[id] = true
+
+		managedRoles = append(managedRoles, model.ManagedRole{
+			ID:          role.ID,
+			ParentID:    role.ParentID,
+			ParentName:  parentName,
+			Name:        role.Name,
+			Departments: departments,
+		})
+	}
+
+	return managedRoles, nil
+}
+
+// getManagedMenu 获取人员的菜单权限ID列表
+func (s *PersonService) getManagedMenu(customerID, personID int) ([]int, error) {
+	roles, err := s.deptRepo.GetPersonRoles(customerID, personID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get person roles: %w", err)
+	}
+
+	if len(roles) == 0 {
+		return []int{}, nil
+	}
+
+	menuIDMap := make(map[int]bool)
+	for _, role := range roles {
+		if role.Permissions == "" {
+			continue
+		}
+
+		ids := strings.Split(role.Permissions, ",")
+		for _, idStr := range ids {
+			idStr = strings.TrimSpace(idStr)
+			if idStr == "" {
+				continue
+			}
+			if id, err := strconv.Atoi(idStr); err == nil {
+				menuIDMap[id] = true
+			}
 		}
 	}
-	// 2.2 获取直接分配给人员的部门权限
-	directDeptIDs, err := s.deptRepo.GetDirectDepartmentIDs(personID)
+
+	menuIDs := make([]int, 0, len(menuIDMap))
+	for id := range menuIDMap {
+		menuIDs = append(menuIDs, id)
+	}
+
+	return menuIDs, nil
+}
+
+// GetManagedDepartmentIDs 获取人员管辖的所有机构ID（包含子机构，用于权限过滤）
+func (s *PersonService) GetManagedDepartmentIDs(customerID, personID int) ([]int, error) {
+	directDeptIDs, err := s.deptRepo.GetDirectDepartmentIDs(customerID, personID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get direct department ids: %w", err)
 	}
-	for _, id := range directDeptIDs {
-		authorizedDeptIDMap[id] = true
-	}
-	// 如果没有任何权限，返回空列表
-	if len(authorizedDeptIDMap) == 0 {
+
+	if len(directDeptIDs) == 0 {
 		return []int{}, nil
 	}
-	// 3. 转换为切片
-	authorizedDeptIDs := make([]int, 0, len(authorizedDeptIDMap))
-	for id := range authorizedDeptIDMap {
-		authorizedDeptIDs = append(authorizedDeptIDs, id)
-	}
-	// 4. 扩展为包含所有子部门的ID列表
-	visibleDeptIDs, err := s.deptRepo.ExpandDepartmentIDs(customerID, authorizedDeptIDs)
+
+	visibleDeptIDs, err := s.deptRepo.ExpandDepartmentIDs(customerID, directDeptIDs)
 	if err != nil {
 		return nil, fmt.Errorf("failed to expand department ids: %w", err)
 	}
+
 	return visibleDeptIDs, nil
-}
-
-// getManagedPersonIDs 获取政工人员管辖的人员ID列表
-func (s *PersonService) getManagedPersonIDs(customerID, personID int) ([]int, error) {
-	// 1. 获取政工人员的所有角色
-	roleIDs, err := s.deptRepo.GetStaffRoleIDs(personID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get staff role ids: %w", err)
-	}
-
-	if len(roleIDs) == 0 {
-		return []int{}, nil
-	}
-
-	// 2. 获取这些角色的人员权限
-	personIDs, err := s.deptRepo.GetRolePersonIDs(customerID, roleIDs)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get role person ids: %w", err)
-	}
-
-	return personIDs, nil
 }
 
 // GetAdminUserInfo 获取学校管理员完整信息
@@ -164,7 +214,6 @@ func (s *PersonService) GetAdminUserInfo(userID int) (*model.AdminUserInfo, erro
 		return nil, fmt.Errorf("failed to get admin user info: %w", err)
 	}
 
-	// 获取大学名称
 	if info.UniversityID > 0 {
 		name, err := s.repo.GetDepartmentName(info.UniversityID)
 		if err == nil {
@@ -177,7 +226,6 @@ func (s *PersonService) GetAdminUserInfo(userID int) (*model.AdminUserInfo, erro
 
 // GetPersonList 查询人员列表
 func (s *PersonService) GetPersonList(req *model.PersonListRequest, isStaff bool, visibleDeptIDs, managedPersonIDs []int) (*model.PersonListResponse, error) {
-	// 设置默认分页参数
 	if req.Page < 1 {
 		req.Page = 1
 	}
@@ -188,13 +236,11 @@ func (s *PersonService) GetPersonList(req *model.PersonListRequest, isStaff bool
 		req.PageSize = 100
 	}
 
-	// 查询人员列表
 	persons, total, err := s.repo.GetPersonList(req, visibleDeptIDs, managedPersonIDs, isStaff)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get person list: %w", err)
 	}
 
-	// 如果需要扩展信息，批量查询
 	if req.WithExtend && len(persons) > 0 {
 		personIDs := make([]int, len(persons))
 		for i, p := range persons {
@@ -202,26 +248,20 @@ func (s *PersonService) GetPersonList(req *model.PersonListRequest, isStaff bool
 		}
 
 		if req.PersonType == 1 {
-			// 查询学生扩展信息
 			extendMap, err := s.repo.GetStudentExtendInfo(personIDs, req)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get student extend info: %w", err)
 			}
-
-			// 合并扩展信息
 			for i := range persons {
 				if extend, ok := extendMap[persons[i].ID]; ok {
 					persons[i].StudentExtend = extend
 				}
 			}
 		} else if req.PersonType == 2 {
-			// 查询政工扩展信息
 			extendMap, err := s.repo.GetStaffExtendInfo(personIDs, req)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get staff extend info: %w", err)
 			}
-
-			// 合并扩展信息
 			for i := range persons {
 				if extend, ok := extendMap[persons[i].ID]; ok {
 					persons[i].StaffExtend = extend

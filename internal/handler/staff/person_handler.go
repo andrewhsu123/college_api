@@ -40,10 +40,27 @@ func (h *PersonHandler) GetPersonList(c *gin.Context) {
 		return
 	}
 
-	info := staffInfo.(*model.StaffInfo)
+	info := staffInfo.(model.PersonInfo)
 
-	// 使用缓存的权限信息进行过滤
-	resp, err := h.service.GetPersonList(&req, true, info.ManagedDepartmentIDs, info.ManagedPersonIDs)
+	// 从 managed_roles 中提取所有管辖的机构ID
+	var visibleDeptIDs []int
+	// 根据具体类型获取 ManagedRoles
+	switch v := info.(type) {
+	case *model.StaffPersonInfo:
+		for _, role := range v.ManagedRoles {
+			for _, dept := range role.Departments {
+				visibleDeptIDs = append(visibleDeptIDs, dept.ID)
+			}
+		}
+	case *model.StudentPersonInfo:
+		for _, role := range v.ManagedRoles {
+			for _, dept := range role.Departments {
+				visibleDeptIDs = append(visibleDeptIDs, dept.ID)
+			}
+		}
+	}
+	// 使用权限信息进行过滤（新逻辑不再使用 managed_person_ids）
+	resp, err := h.service.GetPersonList(&req, true, visibleDeptIDs, nil)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"code":    1005,

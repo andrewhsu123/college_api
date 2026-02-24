@@ -3,7 +3,7 @@ package model
 // Person 人员基础模型
 type Person struct {
 	ID         int    `json:"id" db:"id"`
-	CustomerID int    `json:"customer_id" db:"customer_id"`
+	CustomerID int    `json:"customer_id" db:"customer_id"` // 学校编号
 	PersonType int    `json:"person_type" db:"person_type"` // 1=学生 2=政工 3=维修工
 	Name       string `json:"name" db:"name"`
 	Gender     *int   `json:"gender" db:"gender"` // 1=男 2=女
@@ -49,33 +49,107 @@ type Staff struct {
 	FacultyID    *int   `json:"faculty_id" db:"faculty_id"`
 }
 
-// StaffInfo 政工完整信息（person + staff）
-type StaffInfo struct {
-	// Person 基础信息
-	PersonID   int    `json:"person_id"`
-	PersonType int    `json:"person_type"`
-	Name       string `json:"name"`
-	Gender     *int   `json:"gender"`
-	Mobile     string `json:"mobile"`
-	Email      string `json:"email"`
-	Avatar     string `json:"avatar"`
-	Status     int    `json:"status"`
-
-	// Staff 扩展信息
-	StaffNo        string  `json:"staff_no"`
-	UniversityID   int     `json:"university_id"`
-	UniversityName string  `json:"university_name"`
-	DepartmentID   *int    `json:"department_id"`
-	DepartmentName *string `json:"department_name"`
-	CollegeID      *int    `json:"college_id"`
-	CollegeName    *string `json:"college_name"`
-	FacultyID      *int    `json:"faculty_id"`
-	FacultyName    *string `json:"faculty_name"`
-
-	// 权限信息
-	ManagedDepartmentIDs []int `json:"managed_department_ids"` // 管辖的机构ID数组（包含子机构）
-	ManagedPersonIDs     []int `json:"managed_person_ids"`     // 管辖的人员ID数组
+// PersonInfo 人员完整信息接口（用于统一处理）
+type PersonInfo interface {
+	GetPersonID() int
+	GetPersonType() int
+	GetUniversityID() int
+	SetUniversityName(name string)
+	SetManagedRoles(roles []ManagedRole)
+	SetManagedMenu(menu []int)
 }
+
+// StaffPersonInfo 政工/维修工信息（person_type=2,3）
+type StaffPersonInfo struct {
+	PersonID       int           `json:"person_id"`
+	PersonType     int           `json:"person_type"`
+	UniversityID   int           `json:"university_id"`
+	UniversityName string        `json:"university_name"`
+	Name           string        `json:"name"`
+	Gender         *int          `json:"gender"`
+	Mobile         string        `json:"mobile"`
+	Email          string        `json:"email"`
+	Avatar         string        `json:"avatar"`
+	Status         int           `json:"status"`
+	StaffNo        string        `json:"staff_no"`
+	DepartmentID   *int          `json:"department_id"`
+	DepartmentName *string       `json:"department_name"`
+	CollegeID      *int          `json:"college_id"`
+	CollegeName    *string       `json:"college_name"`
+	FacultyID      *int          `json:"faculty_id"`
+	FacultyName    *string       `json:"faculty_name"`
+	ManagedRoles   []ManagedRole `json:"managed_roles"`
+	ManagedMenu    []int         `json:"managed_menu"`
+}
+
+func (s *StaffPersonInfo) GetPersonID() int                    { return s.PersonID }
+func (s *StaffPersonInfo) GetPersonType() int                  { return s.PersonType }
+func (s *StaffPersonInfo) GetUniversityID() int                { return s.UniversityID }
+func (s *StaffPersonInfo) SetUniversityName(name string)       { s.UniversityName = name }
+func (s *StaffPersonInfo) SetManagedRoles(roles []ManagedRole) { s.ManagedRoles = roles }
+func (s *StaffPersonInfo) SetManagedMenu(menu []int)           { s.ManagedMenu = menu }
+
+// StudentPersonInfo 学生信息（person_type=1）
+type StudentPersonInfo struct {
+	PersonID         int           `json:"person_id"`
+	PersonType       int           `json:"person_type"`
+	UniversityID     int           `json:"university_id"`
+	UniversityName   string        `json:"university_name"`
+	Name             string        `json:"name"`
+	Gender           *int          `json:"gender"`
+	Mobile           string        `json:"mobile"`
+	Email            string        `json:"email"`
+	Avatar           string        `json:"avatar"`
+	Status           int           `json:"status"`
+	StudentNo        string        `json:"student_no"`
+	Grade            string        `json:"grade"`
+	AreaID           *int          `json:"area_id"`
+	EducationLevel   string        `json:"education_level"`
+	SchoolSystem     string        `json:"school_system"`
+	IDCard           string        `json:"id_card"`
+	AdmissionNo      string        `json:"admission_no"`
+	ExamNo           string        `json:"exam_no"`
+	EnrollmentStatus *int          `json:"enrollment_status"`
+	IsEnrolled       *int          `json:"is_enrolled"`
+	CollegeID        *int          `json:"college_id"`
+	CollegeName      *string       `json:"college_name"`
+	FacultyID        *int          `json:"faculty_id"`
+	FacultyName      *string       `json:"faculty_name"`
+	ProfessionID     *int          `json:"profession_id"`
+	ProfessionName   *string       `json:"profession_name"`
+	ClassID          *int          `json:"class_id"`
+	ClassName        *string       `json:"class_name"`
+	ManagedRoles     []ManagedRole `json:"managed_roles"`
+	ManagedMenu      []int         `json:"managed_menu"`
+}
+
+func (s *StudentPersonInfo) GetPersonID() int                    { return s.PersonID }
+func (s *StudentPersonInfo) GetPersonType() int                  { return s.PersonType }
+func (s *StudentPersonInfo) GetUniversityID() int                { return s.UniversityID }
+func (s *StudentPersonInfo) SetUniversityName(name string)       { s.UniversityName = name }
+func (s *StudentPersonInfo) SetManagedRoles(roles []ManagedRole) { s.ManagedRoles = roles }
+func (s *StudentPersonInfo) SetManagedMenu(menu []int)           { s.ManagedMenu = menu }
+
+// ManagedRole 管辖角色信息
+type ManagedRole struct {
+	ID          int                 `json:"id"`
+	ParentID    int                 `json:"parent_id"`
+	ParentName  string              `json:"parent_name"`
+	Name        string              `json:"name"`
+	Departments []ManagedDepartment `json:"departments"`
+}
+
+// ManagedDepartment 管辖机构信息
+type ManagedDepartment struct {
+	ID             int    `json:"id"`
+	ParentID       int    `json:"parent_id"`
+	DepartmentName string `json:"department_name"`
+	DepartmentType int    `json:"department_type"`
+	Status         int    `json:"status"`
+}
+
+// StaffInfo 政工完整信息 - 保留兼容
+type StaffInfo = StaffPersonInfo
 
 // PersonListRequest 人员列表查询请求
 type PersonListRequest struct {
@@ -165,4 +239,28 @@ type PersonListResponse struct {
 	Total    int64              `json:"total"`
 	Page     int                `json:"page"`
 	PageSize int                `json:"page_size"`
+}
+
+// PersonRole 人员角色关系
+type PersonRole struct {
+	CustomerID int `json:"customer_id" db:"customer_id"`
+	PersonID   int `json:"person_id" db:"person_id"`
+	RoleID     int `json:"role_id" db:"role_id"`
+}
+
+// PersonsRole 管辖角色
+type PersonsRole struct {
+	ID          int    `json:"id" db:"id"`
+	CustomerID  int    `json:"customer_id" db:"customer_id"`
+	ParentID    int    `json:"parent_id" db:"parent_id"`
+	Name        string `json:"name" db:"name"`
+	Permissions string `json:"permissions" db:"permissions"` // 菜单权限，逗号分隔的ID
+}
+
+// PersonHasDepartment 人员角色管辖机构关系
+type PersonHasDepartment struct {
+	CustomerID     int `json:"customer_id" db:"customer_id"`
+	PersonsRolesID int `json:"persons_roles_id" db:"persons_roles_id"`
+	PersonID       int `json:"person_id" db:"person_id"`
+	DepartmentID   int `json:"department_id" db:"department_id"`
 }
