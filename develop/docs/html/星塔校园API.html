@@ -1105,7 +1105,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</pre>
 
                 <div class="section-title">请求示例</div>
                 <div class="code-block">
-<pre>GET /api/open/applications/list?customer_id=1
+<pre>GET /api/open/applications/list?customer_id=17
 Authorization: your_open_key_here</pre>
                 </div>
 
@@ -1116,15 +1116,40 @@ Authorization: your_open_key_here</pre>
   "message": "success",
   "data": [
     {
-      "app_code": "student_manage",
-      "app_name": "学生管理系统",
-      "app_url": "https://example.com/student",
-      "short_intro": "学生信息管理",
-      "description": "用于管理学生基本信息、学籍等",
-      "icon": "https://example.com/icons/student.png",
+      "id": 9,
+      "customer_id": 17,
+      "app_code": "leave",
+      "app_name": "请销假",
+      "app_url": "http://u.startower.online/#/applications/applications",
+      "short_intro": "便捷签到，实时统计",
+      "description": "签到晚点应用支持学生签到、晚点记录、统计分析等功能",
+      "icon": "uploads/2026-01-05/attachments/e43cdfb92eaf9c9a226ade0d4cd29382.jpg",
       "data_type": 1,
       "status": 1,
-      "created_at": 1700000000
+      "created_at": 1770690212
+    },
+    {
+      "id": 6,
+      "customer_id": 17,
+      "app_code": "repair",
+      "app_name": "维修报修",
+      "app_url": "repair/index",
+      "short_intro": "快速报修，高效处理",
+      "description": "公寓维修应用支持在线报修、工单管理、维修工分配、评价反馈等功能",
+      "icon": "http://1.13.252.190:10087/uploads/2026-01-05/attachments/0a4623cb44683c10836ab198a12bae29.jpg",
+      "data_type": 2,
+      "status": 1,
+      "created_at": 1770196086,
+      "scope": {
+        "id": 1,
+        "customer_id": 17,
+        "application_id": 6,
+        "range_type": "4",
+        "student_ids": "32,37,38,39,40,44",
+        "staff_ids": "33,34,35,41,45,46,52",
+        "role_ids": "38",
+        "department_ids": "4103,4135,4104,4137,4138,4139,4174,4105,4107,..."
+      }
     }
   ]
 }</pre>
@@ -1216,7 +1241,7 @@ Authorization: your_open_key_here</pre>
 
                 <div class="section-title">请求示例</div>
                 <div class="code-block">
-<pre>GET /api/open/applications/visible?customer_id=1&person_id=9&person_type=2&role_ids=1,2,8&department_ids=61,62
+<pre>GET /api/open/applications/visible?customer_id=17
 Authorization: your_open_key_here</pre>
                 </div>
 
@@ -1227,15 +1252,17 @@ Authorization: your_open_key_here</pre>
   "message": "success",
   "data": [
     {
-      "app_code": "staff_manage",
-      "app_name": "政工管理系统",
-      "app_url": "https://example.com/staff",
-      "short_intro": "政工人员管理",
-      "description": "用于管理政工人员信息",
-      "icon": "https://example.com/icons/staff.png",
-      "data_type": 2,
+      "id": 9,
+      "customer_id": 17,
+      "app_code": "leave",
+      "app_name": "请销假",
+      "app_url": "http://u.startower.online/#/applications/applications",
+      "short_intro": "便捷签到，实时统计",
+      "description": "签到晚点应用支持学生签到、晚点记录、统计分析等功能",
+      "icon": "uploads/2026-01-05/attachments/e43cdfb92eaf9c9a226ade0d4cd29382.jpg",
+      "data_type": 1,
       "status": 1,
-      "created_at": 1700000000
+      "created_at": 1770690212
     }
   ]
 }</pre>
@@ -1346,7 +1373,7 @@ Authorization: your_open_key_here</pre>
 
                 <div class="section-title">请求示例</div>
                 <div class="code-block">
-<pre>GET /api/open/staff/list?university_id=1&with_contact=1&page=1&page_size=20
+<pre>GET /api/open/staff/list?university_id=17&page=1&page_size=20
 Authorization: your_open_key_here</pre>
                 </div>
 
@@ -1358,19 +1385,31 @@ Authorization: your_open_key_here</pre>
   "data": {
     "items": [
       {
-        "person_id": 38,
-        "name": "王五",
-        "staff_no": "S001",
-        "department_id": 5,
-        "college_id": 10,
-        "faculty_id": null,
-        "mobile": "13900139000",
-        "email": "wangwu@example.com",
-        "gender": 1,
-        "status": 1
+        "person_id": 33,
+        "name": "斯内普",
+        "staff_no": "0001",
+        "department_id": 4104,
+        "college_id": 4106,
+        "faculty_id": null
+      },
+      {
+        "person_id": 34,
+        "name": "Albus Dumbledore",
+        "staff_no": "0002",
+        "department_id": 4139,
+        "college_id": null,
+        "faculty_id": null
+      },
+      {
+        "person_id": 35,
+        "name": "格拉普兰",
+        "staff_no": "0003",
+        "department_id": 4104,
+        "college_id": 4108,
+        "faculty_id": null
       }
     ],
-    "total": 50,
+    "total": 8,
     "page": 1,
     "page_size": 20
   }
@@ -1542,7 +1581,7 @@ Authorization: your_open_key_here</pre>
 
                 <div class="section-title">请求示例</div>
                 <div class="code-block">
-<pre>GET /api/open/students/list?university_id=1&grade=2023&with_contact=1&page=1&page_size=20
+<pre>GET /api/open/students/list?university_id=17&page=1&page_size=20
 Authorization: your_open_key_here</pre>
                 </div>
 
@@ -1554,29 +1593,61 @@ Authorization: your_open_key_here</pre>
   "data": {
     "items": [
       {
-        "person_id": 10,
-        "name": "张三",
-        "student_no": "2023001",
-        "area_id": 1,
-        "grade": "2023",
-        "education_level": "本科",
-        "school_system": "4年",
-        "id_card": "110101200501011234",
-        "admission_no": "A2023001",
-        "exam_no": "E2023001",
+        "person_id": 32,
+        "name": "哈利波特大",
+        "student_no": "8989",
+        "area_id": null,
+        "grade": "2025",
+        "education_level": "博士研究生",
+        "school_system": "4",
+        "id_card": "",
+        "admission_no": "",
+        "exam_no": "",
         "enrollment_status": 1,
         "is_enrolled": 1,
-        "college_id": 10,
-        "faculty_id": 11,
-        "profession_id": 12,
-        "class_id": 13,
-        "mobile": "13800138000",
-        "email": "zhangsan@example.com",
-        "gender": 1,
-        "status": 1
+        "college_id": 4106,
+        "faculty_id": 4165,
+        "profession_id": 4114,
+        "class_id": 4121
+      },
+      {
+        "person_id": 37,
+        "name": "罗恩",
+        "student_no": "0001",
+        "area_id": null,
+        "grade": "2025",
+        "education_level": "本科",
+        "school_system": "4",
+        "id_card": "",
+        "admission_no": "",
+        "exam_no": "",
+        "enrollment_status": 1,
+        "is_enrolled": 1,
+        "college_id": 4106,
+        "faculty_id": 4165,
+        "profession_id": 4114,
+        "class_id": 4121
+      },
+      {
+        "person_id": 38,
+        "name": "赫敏",
+        "student_no": "0002",
+        "area_id": null,
+        "grade": "2025",
+        "education_level": "专科",
+        "school_system": "4",
+        "id_card": "",
+        "admission_no": "",
+        "exam_no": "",
+        "enrollment_status": 1,
+        "is_enrolled": 1,
+        "college_id": 4109,
+        "faculty_id": null,
+        "profession_id": 4124,
+        "class_id": 4129
       }
     ],
-    "total": 500,
+    "total": 10,
     "page": 1,
     "page_size": 20
   }
@@ -1634,7 +1705,7 @@ Authorization: your_open_key_here</pre>
 
                 <div class="section-title">请求示例</div>
                 <div class="code-block">
-<pre>GET /api/open/roles/list?university_id=1
+<pre>GET /api/open/roles/list?university_id=17
 Authorization: your_open_key_here</pre>
                 </div>
 
@@ -1645,22 +1716,34 @@ Authorization: your_open_key_here</pre>
   "message": "success",
   "data": [
     {
-      "id": 1,
+      "id": 38,
       "parent_id": 0,
-      "name": "超级管理员",
-      "permissions": "1,2,3,4,5"
-    },
-    {
-      "id": 2,
-      "parent_id": 1,
-      "name": "学院管理员",
-      "permissions": "1,2,3"
-    },
-    {
-      "id": 8,
-      "parent_id": 1,
       "name": "辅导员",
-      "permissions": "1,2"
+      "permissions": "[30,31,37,43,49,55,56,65]"
+    },
+    {
+      "id": 42,
+      "parent_id": 0,
+      "name": "魔法教授",
+      "permissions": "[55,56,65]"
+    },
+    {
+      "id": 43,
+      "parent_id": 0,
+      "name": "校长",
+      "permissions": "[105,111,112,118,119,126,133,136,139,140,146,30,31,37,43,49,55,56,65,73,74,81,87,93,99]"
+    },
+    {
+      "id": 45,
+      "parent_id": 38,
+      "name": "班长",
+      "permissions": "[30,31,37,43,49,55,56,65]"
+    },
+    {
+      "id": 55,
+      "parent_id": 0,
+      "name": "副校长",
+      "permissions": ""
     }
   ]
 }</pre>
@@ -1668,6 +1751,189 @@ Authorization: your_open_key_here</pre>
 
                 <div class="info-box">
                     <strong>说明：</strong>permissions 字段为逗号分隔的菜单ID列表，表示该角色拥有的菜单权限。
+                </div>
+            </div>
+
+
+            <div class="api-section">
+                <h2 class="api-title">14. 查询管辖某人员的管理者</h2>
+                <div>
+                    <span class="method-badge method-get">GET</span>
+                    <span class="endpoint">/api/open/persons/managers</span>
+                </div>
+                
+                <div class="section-title">接口说明</div>
+                <div class="info-box">
+                    <strong>功能：</strong>根据人员ID，查询所有管辖该人员的管理者列表。返回每个管理者的基本信息、所持角色及角色对应的管辖机构。
+                    <br><br>
+                    <strong>查询逻辑：</strong>根据目标人员所属的机构（学生取学院/系/专业/班级，政工取部门/学院/系），在 persons_has_department 表中匹配管辖了这些机构的人员。
+                </div>
+
+                <div class="section-title">请求头</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Authorization</td>
+                            <td>string</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>OPEN_KEY 秘钥</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="section-title">请求参数</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>university_id</td>
+                            <td>int</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>学校ID</td>
+                        </tr>
+                        <tr>
+                            <td>person_id</td>
+                            <td>int</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>被管辖的人员ID</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="section-title">请求示例</div>
+                <div class="code-block">
+<pre>GET /api/open/persons/managers?university_id=17&person_id=35
+Authorization: your_open_key_here</pre>
+                </div>
+
+                <div class="section-title">响应参数</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>manage_persons</td>
+                            <td>array</td>
+                            <td>管辖该人员的管理者列表</td>
+                        </tr>
+                        <tr>
+                            <td>manage_persons[].person_id</td>
+                            <td>int</td>
+                            <td>管理者人员ID</td>
+                        </tr>
+                        <tr>
+                            <td>manage_persons[].person_name</td>
+                            <td>string</td>
+                            <td>管理者姓名</td>
+                        </tr>
+                        <tr>
+                            <td>manage_persons[].roles</td>
+                            <td>array</td>
+                            <td>管理者持有的角色列表</td>
+                        </tr>
+                        <tr>
+                            <td>manage_persons[].roles[].role_id</td>
+                            <td>int</td>
+                            <td>角色ID</td>
+                        </tr>
+                        <tr>
+                            <td>manage_persons[].roles[].role_name</td>
+                            <td>string</td>
+                            <td>角色名称</td>
+                        </tr>
+                        <tr>
+                            <td>manage_persons[].roles[].departments</td>
+                            <td>array</td>
+                            <td>该角色管辖的机构列表</td>
+                        </tr>
+                        <tr>
+                            <td>manage_persons[].roles[].departments[].department_id</td>
+                            <td>int</td>
+                            <td>机构ID</td>
+                        </tr>
+                        <tr>
+                            <td>manage_persons[].roles[].departments[].department_name</td>
+                            <td>string</td>
+                            <td>机构名称</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="section-title">响应示例</div>
+                <div class="code-block">
+<pre>{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "manage_persons": [
+      {
+        "person_id": 45,
+        "person_name": "亚瑟",
+        "roles": [
+          {
+            "role_id": 38,
+            "role_name": "辅导员",
+            "departments": [
+              {
+                "department_id": 4108,
+                "department_name": "赫奇帕奇"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "person_id": 52,
+        "person_name": "伏地魔",
+        "roles": [
+          {
+            "role_id": 38,
+            "role_name": "辅导员",
+            "departments": [
+              {
+                "department_id": 4104,
+                "department_name": "行政机构"
+              },
+              {
+                "department_id": 4108,
+                "department_name": "赫奇帕奇"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}</pre>
+                </div>
+
+                <div class="warning-box">
+                    <strong>注意：</strong>
+                    <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                        <li>返回结果不包含被查询人员自身（即使该人员也有管辖角色）</li>
+                        <li>departments 仅返回与被查询人员所属机构匹配的管辖机构，不是管理者的全部管辖机构</li>
+                        <li>如果人员不存在或未关联任何机构，返回空的 manage_persons 数组</li>
+                    </ul>
                 </div>
             </div>
         </div>
