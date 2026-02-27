@@ -92,6 +92,37 @@ type OpenStudentResponse struct {
 	PageSize int               `json:"page_size"`
 }
 
+// OpenManagePersonsRequest 查询管辖某人员的管理者请求
+type OpenManagePersonsRequest struct {
+	UniversityID int `form:"university_id" binding:"required"`
+	PersonID     int `form:"person_id" binding:"required"`
+}
+
+// OpenManagePersonItem 管辖人员的管理者信息
+type OpenManagePersonItem struct {
+	PersonID   int                    `json:"person_id"`
+	PersonName string                 `json:"person_name"`
+	Roles      []OpenManagePersonRole `json:"roles"`
+}
+
+// OpenManagePersonRole 管理者的角色信息
+type OpenManagePersonRole struct {
+	RoleID      int                          `json:"role_id"`
+	RoleName    string                       `json:"role_name"`
+	Departments []OpenManagePersonDepartment `json:"departments"`
+}
+
+// OpenManagePersonDepartment 角色管辖的机构信息
+type OpenManagePersonDepartment struct {
+	DepartmentID   int    `json:"department_id"`
+	DepartmentName string `json:"department_name"`
+}
+
+// OpenManagePersonsResponse 查询管辖某人员的管理者响应
+type OpenManagePersonsResponse struct {
+	ManagePersons []OpenManagePersonItem `json:"manage_persons"`
+}
+
 // OpenRoleRequest 开放接口角色查询请求
 type OpenRoleRequest struct {
 	UniversityID int `form:"university_id" binding:"required"`

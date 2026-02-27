@@ -29,3 +29,12 @@ func (s *OpenPersonService) GetStudentList(req *model.OpenStudentRequest) (*mode
 func (s *OpenPersonService) GetRoleList(req *model.OpenRoleRequest) ([]model.OpenRoleItem, error) {
 	return s.repo.GetRoleList(req)
 }
+
+// GetManagePersons 查询管辖某人员的管理者列表
+func (s *OpenPersonService) GetManagePersons(req *model.OpenManagePersonsRequest) (*model.OpenManagePersonsResponse, error) {
+	items, err := s.repo.GetManagePersons(req.UniversityID, req.PersonID)
+	if err != nil {
+		return nil, err
+	}
+	return &model.OpenManagePersonsResponse{ManagePersons: items}, nil
+}

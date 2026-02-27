@@ -118,6 +118,7 @@ func main() {
 			openGroup.GET("/staff/list", openPersonHandler.GetStaffList)
 			openGroup.GET("/students/list", openPersonHandler.GetStudentList)
 			openGroup.GET("/roles/list", openPersonHandler.GetRoleList)
+			openGroup.GET("/persons/managers", openPersonHandler.GetManagePersons)
 		}
 	}
 

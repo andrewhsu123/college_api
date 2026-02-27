@@ -104,3 +104,32 @@ func (h *PersonHandler) GetRoleList(c *gin.Context) {
 		"data":    items,
 	})
 }
+
+// GetManagePersons 查询管辖某人员的管理者列表
+func (h *PersonHandler) GetManagePersons(c *gin.Context) {
+	var req model.OpenManagePersonsRequest
+	if err := c.ShouldBindQuery(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    400,
+			"message": "参数错误",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	resp, err := h.service.GetManagePersons(&req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    500,
+			"message": "查询失败",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"message": "success",
+		"data":    resp,
+	})
+}
