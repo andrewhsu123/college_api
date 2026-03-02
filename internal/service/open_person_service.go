@@ -30,6 +30,11 @@ func (s *OpenPersonService) GetRoleList(req *model.OpenRoleRequest) ([]model.Ope
 	return s.repo.GetRoleList(req)
 }
 
+// GetRolePersons 根据角色查询人员详情列表
+func (s *OpenPersonService) GetRolePersons(req *model.OpenRolePersonsRequest) (*model.OpenRolePersonsResponse, error) {
+	return s.repo.GetRolePersons(req)
+}
+
 // GetManagePersons 查询管辖某人员的管理者列表
 func (s *OpenPersonService) GetManagePersons(req *model.OpenManagePersonsRequest) (*model.OpenManagePersonsResponse, error) {
 	items, err := s.repo.GetManagePersons(req.UniversityID, req.PersonID)

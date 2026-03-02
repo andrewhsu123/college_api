@@ -176,15 +176,21 @@ func (r *OpenPersonRepository) addStaffFilters(query string, args []any, req *mo
 		}
 	}
 
-	if req.DepartmentID != nil {
+	if req.DepartmentIDs != "" {
+		query, args = r.addInFilter(query, args, "s.department_id", req.DepartmentIDs)
+	} else if req.DepartmentID != nil {
 		query += " AND s.department_id = ?"
 		args = append(args, *req.DepartmentID)
 	}
-	if req.CollegeID != nil {
+	if req.CollegeIDs != "" {
+		query, args = r.addInFilter(query, args, "s.college_id", req.CollegeIDs)
+	} else if req.CollegeID != nil {
 		query += " AND s.college_id = ?"
 		args = append(args, *req.CollegeID)
 	}
-	if req.FacultyID != nil {
+	if req.FacultyIDs != "" {
+		query, args = r.addInFilter(query, args, "s.faculty_id", req.FacultyIDs)
+	} else if req.FacultyID != nil {
 		query += " AND s.faculty_id = ?"
 		args = append(args, *req.FacultyID)
 	}
@@ -400,19 +406,27 @@ func (r *OpenPersonRepository) addStudentFilters(query string, args []any, req *
 		query += " AND s.is_enrolled = ?"
 		args = append(args, *req.IsEnrolled)
 	}
-	if req.CollegeID != nil {
+	if req.CollegeIDs != "" {
+		query, args = r.addInFilter(query, args, "s.college_id", req.CollegeIDs)
+	} else if req.CollegeID != nil {
 		query += " AND s.college_id = ?"
 		args = append(args, *req.CollegeID)
 	}
-	if req.FacultyID != nil {
+	if req.FacultyIDs != "" {
+		query, args = r.addInFilter(query, args, "s.faculty_id", req.FacultyIDs)
+	} else if req.FacultyID != nil {
 		query += " AND s.faculty_id = ?"
 		args = append(args, *req.FacultyID)
 	}
-	if req.ProfessionID != nil {
+	if req.ProfessionIDs != "" {
+		query, args = r.addInFilter(query, args, "s.profession_id", req.ProfessionIDs)
+	} else if req.ProfessionID != nil {
 		query += " AND s.profession_id = ?"
 		args = append(args, *req.ProfessionID)
 	}
-	if req.ClassID != nil {
+	if req.ClassIDs != "" {
+		query, args = r.addInFilter(query, args, "s.class_id", req.ClassIDs)
+	} else if req.ClassID != nil {
 		query += " AND s.class_id = ?"
 		args = append(args, *req.ClassID)
 	}
@@ -741,6 +755,321 @@ func (r *OpenPersonRepository) parseIntIDs(idsStr string) []int {
 		}
 	}
 	return result
+}
+
+// addInFilter 通用的多ID IN查询条件构建
+func (r *OpenPersonRepository) addInFilter(query string, args []any, column string, idsStr string) (string, []any) {
+	ids := r.parseIntIDs(idsStr)
+	if len(ids) > 0 {
+		placeholders := make([]string, len(ids))
+		for i, id := range ids {
+			placeholders[i] = "?"
+			args = append(args, id)
+		}
+		query += fmt.Sprintf(" AND %s IN (%s)", column, strings.Join(placeholders, ","))
+	}
+	return query, args
+}
+
+// GetRolePersons 根据角色查询人员详情（支持多角色、分页）
+func (r *OpenPersonRepository) GetRolePersons(req *model.OpenRolePersonsRequest) (*model.OpenRolePersonsResponse, error) {
+	if req.Page < 1 {
+		req.Page = 1
+	}
+	if req.PageSize < 1 {
+		req.PageSize = 20
+	}
+	if req.PageSize > 1000 {
+		req.PageSize = 1000
+	}
+
+	// 解析角色ID
+	roleIDs, err := r.resolveRoleIDs(req)
+	if err != nil {
+		return nil, err
+	}
+	if len(roleIDs) == 0 {
+		return &model.OpenRolePersonsResponse{Items: []model.OpenRolePersonItem{}, Total: 0, Page: req.Page, PageSize: req.PageSize}, nil
+	}
+
+	// 查询去重后的人员总数
+	countQuery := "SELECT COUNT(DISTINCT person_id) FROM persons_has_roles WHERE customer_id = ? AND role_id IN (" + r.buildPlaceholders(len(roleIDs)) + ")"
+	countArgs := []any{req.UniversityID}
+	for _, id := range roleIDs {
+		countArgs = append(countArgs, id)
+	}
+	var total int64
+	if err := r.db.QueryRow(countQuery, countArgs...).Scan(&total); err != nil {
+		return nil, fmt.Errorf("count error: %w", err)
+	}
+
+	if total == 0 {
+		return &model.OpenRolePersonsResponse{Items: []model.OpenRolePersonItem{}, Total: 0, Page: req.Page, PageSize: req.PageSize}, nil
+	}
+
+	// 分页查询人员ID
+	pidQuery := "SELECT DISTINCT person_id FROM persons_has_roles WHERE customer_id = ? AND role_id IN (" + r.buildPlaceholders(len(roleIDs)) + ") ORDER BY person_id ASC LIMIT ? OFFSET ?"
+	pidArgs := []any{req.UniversityID}
+	for _, id := range roleIDs {
+		pidArgs = append(pidArgs, id)
+	}
+	offset := (req.Page - 1) * req.PageSize
+	pidArgs = append(pidArgs, req.PageSize, offset)
+
+	pidRows, err := r.db.Query(pidQuery, pidArgs...)
+	if err != nil {
+		return nil, fmt.Errorf("query person_ids error: %w", err)
+	}
+	defer pidRows.Close()
+
+	var personIDs []int
+	for pidRows.Next() {
+		var pid int
+		if err := pidRows.Scan(&pid); err != nil {
+			return nil, err
+		}
+		personIDs = append(personIDs, pid)
+	}
+
+	if len(personIDs) == 0 {
+		return &model.OpenRolePersonsResponse{Items: []model.OpenRolePersonItem{}, Total: total, Page: req.Page, PageSize: req.PageSize}, nil
+	}
+
+	// 批量查询人员基础信息
+	items, err := r.batchGetPersonBaseInfo(req.UniversityID, personIDs)
+	if err != nil {
+		return nil, err
+	}
+
+	// 按人员类型分组，补充扩展信息
+	var studentPIDs, staffPIDs []int
+	itemMap := make(map[int]*model.OpenRolePersonItem)
+	for i := range items {
+		itemMap[items[i].PersonID] = &items[i]
+		if items[i].PersonType == 1 {
+			studentPIDs = append(studentPIDs, items[i].PersonID)
+		} else {
+			staffPIDs = append(staffPIDs, items[i].PersonID)
+		}
+	}
+
+	// 补充学生扩展信息
+	if len(studentPIDs) > 0 {
+		if err := r.enrichStudentInfo(req.UniversityID, studentPIDs, itemMap); err != nil {
+			return nil, err
+		}
+	}
+
+	// 补充政工扩展信息
+	if len(staffPIDs) > 0 {
+		if err := r.enrichStaffInfo(req.UniversityID, staffPIDs, itemMap); err != nil {
+			return nil, err
+		}
+	}
+
+	// 批量查询机构名称并填充
+	deptIDs := r.collectDeptIDs(items)
+	deptNames, err := r.batchGetDepartmentNames(deptIDs)
+	if err != nil {
+		return nil, err
+	}
+	r.fillDeptNames(items, deptNames)
+
+	return &model.OpenRolePersonsResponse{Items: items, Total: total, Page: req.Page, PageSize: req.PageSize}, nil
+}
+
+// resolveRoleIDs 解析请求中的角色ID（支持 role_ids 或 role_name）
+func (r *OpenPersonRepository) resolveRoleIDs(req *model.OpenRolePersonsRequest) ([]int, error) {
+	if req.RoleIDs != "" {
+		return r.parseIntIDs(req.RoleIDs), nil
+	}
+	if req.RoleName != "" {
+		var roleID int
+		err := r.db.QueryRow(
+			"SELECT id FROM persons_roles WHERE customer_id = ? AND name = ? AND deleted_at = 0 LIMIT 1",
+			req.UniversityID, req.RoleName,
+		).Scan(&roleID)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				return nil, nil
+			}
+			return nil, fmt.Errorf("query role error: %w", err)
+		}
+		return []int{roleID}, nil
+	}
+	return nil, fmt.Errorf("role_ids or role_name is required")
+}
+
+// batchGetPersonBaseInfo 批量查询人员基础信息
+func (r *OpenPersonRepository) batchGetPersonBaseInfo(universityID int, personIDs []int) ([]model.OpenRolePersonItem, error) {
+	query := "SELECT id, person_type, name, mobile, status FROM persons WHERE customer_id = ? AND id IN (" + r.buildPlaceholders(len(personIDs)) + ") AND deleted_at = 0 ORDER BY id ASC"
+	args := []any{universityID}
+	for _, id := range personIDs {
+		args = append(args, id)
+	}
+
+	rows, err := r.db.Query(query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("query persons error: %w", err)
+	}
+	defer rows.Close()
+
+	var items []model.OpenRolePersonItem
+	for rows.Next() {
+		var item model.OpenRolePersonItem
+		var mobile sql.NullString
+		if err := rows.Scan(&item.PersonID, &item.PersonType, &item.Name, &mobile, &item.Status); err != nil {
+			return nil, err
+		}
+		if mobile.Valid {
+			item.Mobile = &mobile.String
+		}
+		items = append(items, item)
+	}
+	return items, nil
+}
+
+// enrichStudentInfo 补充学生扩展信息（学号、组织机构）
+func (r *OpenPersonRepository) enrichStudentInfo(universityID int, personIDs []int, itemMap map[int]*model.OpenRolePersonItem) error {
+	query := "SELECT person_id, COALESCE(student_no, '') as student_no, college_id, faculty_id, profession_id, class_id FROM students WHERE university_id = ? AND person_id IN (" + r.buildPlaceholders(len(personIDs)) + ")"
+	args := []any{universityID}
+	for _, id := range personIDs {
+		args = append(args, id)
+	}
+
+	rows, err := r.db.Query(query, args...)
+	if err != nil {
+		return fmt.Errorf("query students error: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var pid int
+		var studentNo string
+		var collegeID, professionID sql.NullInt64
+		var facultyID, classID sql.NullInt64
+		if err := rows.Scan(&pid, &studentNo, &collegeID, &facultyID, &professionID, &classID); err != nil {
+			return err
+		}
+		item, ok := itemMap[pid]
+		if !ok {
+			continue
+		}
+		item.StudentNo = &studentNo
+		if collegeID.Valid {
+			c := int(collegeID.Int64)
+			item.CollegeID = &c
+		}
+		if facultyID.Valid {
+			f := int(facultyID.Int64)
+			item.FacultyID = &f
+		}
+		if professionID.Valid {
+			p := int(professionID.Int64)
+			item.ProfessionID = &p
+		}
+		if classID.Valid {
+			cl := int(classID.Int64)
+			item.ClassID = &cl
+		}
+	}
+	return nil
+}
+
+// enrichStaffInfo 补充政工扩展信息（工号、组织机构）
+func (r *OpenPersonRepository) enrichStaffInfo(universityID int, personIDs []int, itemMap map[int]*model.OpenRolePersonItem) error {
+	query := "SELECT person_id, COALESCE(staff_no, '') as staff_no, department_id, college_id, faculty_id FROM staff WHERE university_id = ? AND person_id IN (" + r.buildPlaceholders(len(personIDs)) + ")"
+	args := []any{universityID}
+	for _, id := range personIDs {
+		args = append(args, id)
+	}
+
+	rows, err := r.db.Query(query, args...)
+	if err != nil {
+		return fmt.Errorf("query staff error: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var pid int
+		var staffNo string
+		var deptID, collegeID, facultyID sql.NullInt64
+		if err := rows.Scan(&pid, &staffNo, &deptID, &collegeID, &facultyID); err != nil {
+			return err
+		}
+		item, ok := itemMap[pid]
+		if !ok {
+			continue
+		}
+		item.StaffNo = &staffNo
+		if deptID.Valid {
+			d := int(deptID.Int64)
+			item.DepartmentID = &d
+		}
+		if collegeID.Valid {
+			c := int(collegeID.Int64)
+			item.CollegeID = &c
+		}
+		if facultyID.Valid {
+			f := int(facultyID.Int64)
+			item.FacultyID = &f
+		}
+	}
+	return nil
+}
+
+// collectDeptIDs 收集所有机构ID用于批量查询名称
+func (r *OpenPersonRepository) collectDeptIDs(items []model.OpenRolePersonItem) map[int]bool {
+	ids := make(map[int]bool)
+	for _, item := range items {
+		if item.CollegeID != nil {
+			ids[*item.CollegeID] = true
+		}
+		if item.FacultyID != nil {
+			ids[*item.FacultyID] = true
+		}
+		if item.DepartmentID != nil {
+			ids[*item.DepartmentID] = true
+		}
+		if item.ProfessionID != nil {
+			ids[*item.ProfessionID] = true
+		}
+		if item.ClassID != nil {
+			ids[*item.ClassID] = true
+		}
+	}
+	return ids
+}
+
+// fillDeptNames 将机构名称填充到人员详情中
+func (r *OpenPersonRepository) fillDeptNames(items []model.OpenRolePersonItem, names map[int]string) {
+	for i := range items {
+		if items[i].CollegeID != nil {
+			if n, ok := names[*items[i].CollegeID]; ok {
+				items[i].CollegeName = &n
+			}
+		}
+		if items[i].FacultyID != nil {
+			if n, ok := names[*items[i].FacultyID]; ok {
+				items[i].FacultyName = &n
+			}
+		}
+		if items[i].DepartmentID != nil {
+			if n, ok := names[*items[i].DepartmentID]; ok {
+				items[i].DepartmentName = &n
+			}
+		}
+		if items[i].ProfessionID != nil {
+			if n, ok := names[*items[i].ProfessionID]; ok {
+				items[i].ProfessionName = &n
+			}
+		}
+		if items[i].ClassID != nil {
+			if n, ok := names[*items[i].ClassID]; ok {
+				items[i].ClassName = &n
+			}
+		}
+	}
 }
 
 // GetRoleList 查询角色列表

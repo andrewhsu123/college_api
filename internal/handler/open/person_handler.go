@@ -133,3 +133,41 @@ func (h *PersonHandler) GetManagePersons(c *gin.Context) {
 		"data":    resp,
 	})
 }
+
+// GetRolePersons 根据角色查询人员详情列表
+func (h *PersonHandler) GetRolePersons(c *gin.Context) {
+	var req model.OpenRolePersonsRequest
+	if err := c.ShouldBindQuery(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    400,
+			"message": "参数错误",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	if req.RoleIDs == "" && req.RoleName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"code":    400,
+			"message": "参数错误",
+			"error":   "role_ids or role_name is required",
+		})
+		return
+	}
+
+	resp, err := h.service.GetRolePersons(&req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    500,
+			"message": "查询失败",
+			"error":   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"message": "success",
+		"data":    resp,
+	})
+}

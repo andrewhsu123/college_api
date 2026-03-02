@@ -20,19 +20,20 @@ SET FOREIGN_KEY_CHECKS=0;
 -- ----------------------------
 DROP TABLE IF EXISTS `staff`;
 CREATE TABLE `staff` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `university_id` int(10) unsigned NOT NULL COMMENT '高校ID(关联customers表)',
-  `person_id` int(10) unsigned NOT NULL COMMENT '关联人员ID',
-  `staff_no` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '工号',
-  `name` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '姓名(冗余字段)',
-  `department_id` int(10) unsigned DEFAULT NULL COMMENT '所属部门ID(关联departments表)',
-  `college_id` int(10) unsigned DEFAULT NULL COMMENT '所属学院ID(关联departments表)',
-  `faculty_id` int(10) unsigned DEFAULT NULL COMMENT '所属系ID(关联departments表)',
-  `created_at` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
-  `updated_at` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '更新时间',
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `university_id` int unsigned NOT NULL COMMENT '高校ID(关联customers表)',
+  `person_id` int unsigned NOT NULL COMMENT '关联人员ID',
+  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '姓名(冗余字段)',
+  `staff_no` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '工号',
+  `department_id` int unsigned DEFAULT NULL COMMENT '所属部门ID(关联departments表)',
+  `college_id` int unsigned DEFAULT NULL COMMENT '所属学院ID(关联departments表)',
+  `faculty_id` int unsigned DEFAULT NULL COMMENT '所属系ID(关联departments表)',
+  `created_at` int unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
+  `updated_at` int unsigned NOT NULL DEFAULT '0' COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE KEY `uk_staff_no` (`staff_no`) USING BTREE,
-  KEY `idx_person` (`person_id`) USING BTREE,
-  KEY `idx_org_path` (`university_id`,`college_id`,`faculty_id`) USING BTREE,
-  KEY `idx_dept` (`department_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='政工表';
+  KEY `idx_college` (`university_id`,`college_id`) USING BTREE,
+  KEY `idx_department` (`university_id`,`department_id`) USING BTREE,
+  KEY `idx_faculty` (`university_id`,`faculty_id`),
+  KEY `idx_person` (`university_id`,`person_id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='政工表';
+

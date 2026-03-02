@@ -54,6 +54,9 @@ func main() {
 	openPersonRepo := repository.NewOpenPersonRepository(db)
 	openPersonService := service.NewOpenPersonService(openPersonRepo)
 
+	collegeRepo := repository.NewCollegeRepository(db)
+	collegeService := service.NewCollegeService(collegeRepo)
+
 	// 创建Gin引擎
 	r := gin.Default()
 
@@ -109,6 +112,7 @@ func main() {
 		// 创建处理器
 		openAppHandler := open.NewApplicationHandler(appService)
 		openPersonHandler := open.NewPersonHandler(openPersonService)
+		openCollegeHandler := open.NewCollegeHandler(collegeService)
 
 		// 使用秘钥认证中间件
 		openGroup.Use(openMiddleware.AuthMiddleware())
@@ -119,6 +123,10 @@ func main() {
 			openGroup.GET("/students/list", openPersonHandler.GetStudentList)
 			openGroup.GET("/roles/list", openPersonHandler.GetRoleList)
 			openGroup.GET("/persons/managers", openPersonHandler.GetManagePersons)
+			openGroup.GET("/roles/persons", openPersonHandler.GetRolePersons)
+			openGroup.GET("/colleges/list", openCollegeHandler.GetCollegeList)
+			openGroup.GET("/campus-areas/list", openCollegeHandler.GetCampusAreaList)
+			openGroup.GET("/departments/list", openCollegeHandler.GetDepartmentList)
 		}
 	}
 
