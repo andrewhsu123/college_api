@@ -1339,16 +1339,34 @@ Authorization: your_open_key_here</pre>
                             <td>部门ID</td>
                         </tr>
                         <tr>
+                            <td>department_ids</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>部门ID列表（逗号分隔，与department_id二选一）</td>
+                        </tr>
+                        <tr>
                             <td>college_id</td>
                             <td>int</td>
                             <td><span class="param-optional">否</span></td>
                             <td>学院ID</td>
                         </tr>
                         <tr>
+                            <td>college_ids</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>学院ID列表（逗号分隔，与college_id二选一）</td>
+                        </tr>
+                        <tr>
                             <td>faculty_id</td>
                             <td>int</td>
                             <td><span class="param-optional">否</span></td>
                             <td>系ID</td>
+                        </tr>
+                        <tr>
+                            <td>faculty_ids</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>系ID列表（逗号分隔，与faculty_id二选一）</td>
                         </tr>
                         <tr>
                             <td>with_contact</td>
@@ -1541,10 +1559,22 @@ Authorization: your_open_key_here</pre>
                             <td>学院ID</td>
                         </tr>
                         <tr>
+                            <td>college_ids</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>学院ID列表（逗号分隔，与college_id二选一）</td>
+                        </tr>
+                        <tr>
                             <td>faculty_id</td>
                             <td>int</td>
                             <td><span class="param-optional">否</span></td>
                             <td>系ID</td>
+                        </tr>
+                        <tr>
+                            <td>faculty_ids</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>系ID列表（逗号分隔，与faculty_id二选一）</td>
                         </tr>
                         <tr>
                             <td>profession_id</td>
@@ -1553,10 +1583,22 @@ Authorization: your_open_key_here</pre>
                             <td>专业ID</td>
                         </tr>
                         <tr>
+                            <td>profession_ids</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>专业ID列表（逗号分隔，与profession_id二选一）</td>
+                        </tr>
+                        <tr>
                             <td>class_id</td>
                             <td>int</td>
                             <td><span class="param-optional">否</span></td>
                             <td>班级ID</td>
+                        </tr>
+                        <tr>
+                            <td>class_ids</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>班级ID列表（逗号分隔，与class_id二选一）</td>
                         </tr>
                         <tr>
                             <td>with_contact</td>
@@ -2103,7 +2145,7 @@ Authorization: your_open_key_here</pre>
 
                 <div class="section-title">请求示例</div>
                 <div class="code-block">
-<pre>GET /api/open/campus-areas/list?university_id=17
+<pre>GET /api/open/campus-areas/list?university_id=35
 Authorization: your_open_key_here</pre>
                 </div>
 
@@ -2114,12 +2156,8 @@ Authorization: your_open_key_here</pre>
   "message": "success",
   "data": [
     {
-      "id": 1,
-      "area_name": "霍格沃茨主校区"
-    },
-    {
-      "id": 2,
-      "area_name": "对角巷分校区"
+      "id": 93,
+      "area_name": "应用测试大学"
     }
   ]
 }</pre>
@@ -2361,6 +2399,217 @@ Authorization: your_open_key_here</pre>
                         <li>person_type!=1 为政工，返回 staff_no、department、college、faculty 等政工扩展字段</li>
                         <li>所有组织机构ID同时返回对应的名称字段（如 college_id 对应 college_name）</li>
                     </ul>
+                </div>
+            </div>
+
+
+            <div class="api-section">
+                <h2 class="api-title">18. 查询部门列表</h2>
+                <div>
+                    <span class="method-badge method-get">GET</span>
+                    <span class="endpoint">/api/open/departments/list</span>
+                </div>
+                
+                <div class="section-title">接口说明</div>
+                <div class="info-box">
+                    <strong>功能：</strong>根据学校ID查询该校所有部门列表，返回部门ID、父级ID、部门名称和部门类型。
+                </div>
+
+                <div class="section-title">请求头</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Authorization</td>
+                            <td>string</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>OPEN_KEY 秘钥</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="section-title">请求参数</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>university_id</td>
+                            <td>int</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>学校ID</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="section-title">请求示例</div>
+                <div class="code-block">
+<pre>GET /api/open/departments/list?university_id=35
+Authorization: your_open_key_here</pre>
+                </div>
+
+                <div class="section-title">响应参数</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>id</td>
+                            <td>int</td>
+                            <td>部门ID</td>
+                        </tr>
+                        <tr>
+                            <td>parent_id</td>
+                            <td>int</td>
+                            <td>父级部门ID（0表示顶级）</td>
+                        </tr>
+                        <tr>
+                            <td>department_name</td>
+                            <td>string</td>
+                            <td>部门名称</td>
+                        </tr>
+                        <tr>
+                            <td>department_type</td>
+                            <td>int</td>
+                            <td>机构类型：0=学校 1=行政机构 2=学院 3=系 4=专业 5=班级</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="section-title">响应示例</div>
+                <div class="code-block">
+<pre>{
+  "code": 0,
+  "message": "success",
+  "data": [
+    {
+      "id": 24759,
+      "parent_id": 0,
+      "department_name": "应用测试大学",
+      "department_type": 0
+    },
+    {
+      "id": 24760,
+      "parent_id": 24759,
+      "department_name": "行政机构",
+      "department_type": 1
+    },
+    {
+      "id": 24788,
+      "parent_id": 24760,
+      "department_name": "行政服务中心",
+      "department_type": 1
+    },
+    {
+      "id": 24789,
+      "parent_id": 24788,
+      "department_name": "校领导办公室",
+      "department_type": 1
+    },
+    {
+      "id": 24761,
+      "parent_id": 24759,
+      "department_name": "组织机构",
+      "department_type": 2
+    },
+    {
+      "id": 24773,
+      "parent_id": 24761,
+      "department_name": "教务处",
+      "department_type": 2
+    },
+    {
+      "id": 24774,
+      "parent_id": 24761,
+      "department_name": "计算机学院",
+      "department_type": 2
+    },
+    {
+      "id": 24775,
+      "parent_id": 24774,
+      "department_name": "web方向",
+      "department_type": 4
+    },
+    {
+      "id": 24776,
+      "parent_id": 24775,
+      "department_name": "1班",
+      "department_type": 5
+    },
+    {
+      "id": 24790,
+      "parent_id": 24761,
+      "department_name": "计算机科学与技术学院",
+      "department_type": 2
+    },
+    {
+      "id": 24791,
+      "parent_id": 24790,
+      "department_name": "软件工程",
+      "department_type": 4
+    },
+    {
+      "id": 24792,
+      "parent_id": 24791,
+      "department_name": "软工一班",
+      "department_type": 5
+    },
+    {
+      "id": 24793,
+      "parent_id": 24761,
+      "department_name": "物理与信息工程学院",
+      "department_type": 2
+    },
+    {
+      "id": 24794,
+      "parent_id": 24793,
+      "department_name": "太空",
+      "department_type": 3
+    },
+    {
+      "id": 24795,
+      "parent_id": 24794,
+      "department_name": "量子力学",
+      "department_type": 4
+    },
+    {
+      "id": 24796,
+      "parent_id": 24795,
+      "department_name": "三年六班",
+      "department_type": 5
+    },
+    {
+      "id": 24797,
+      "parent_id": 24761,
+      "department_name": "花果山",
+      "department_type": 3
+    },
+    {
+      "id": 24798,
+      "parent_id": 24797,
+      "department_name": "选桃",
+      "department_type": 4
+    }
+  ]
+}</pre>
                 </div>
             </div>
         </div>
