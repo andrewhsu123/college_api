@@ -229,3 +229,26 @@ type OpenDepartmentListItem struct {
 	DepartmentName string `json:"department_name"`
 	DepartmentType int    `json:"department_type"`
 }
+
+// OpenStaffByOrgRequest 按组织机构查询政工请求（OR条件）
+type OpenStaffByOrgRequest struct {
+	UniversityID  int    `form:"university_id" binding:"required"` // 学校ID（必填）
+	DepartmentIDs string `form:"department_ids"`                   // 部门ID列表，逗号分隔
+	CollegeIDs    string `form:"college_ids"`                      // 学院ID列表，逗号分隔
+	FacultyIDs    string `form:"faculty_ids"`                      // 系ID列表，逗号分隔
+	WithContact   *int   `form:"with_contact"`                     // 1=显示手机、邮箱、性别、状态
+	Page          int    `form:"page"`
+	PageSize      int    `form:"page_size"`
+}
+
+// OpenStudentByOrgRequest 按组织机构查询学生请求（OR条件）
+type OpenStudentByOrgRequest struct {
+	UniversityID  int    `form:"university_id" binding:"required"` // 学校ID（必填）
+	CollegeIDs    string `form:"college_ids"`                      // 学院ID列表，逗号分隔
+	FacultyIDs    string `form:"faculty_ids"`                      // 系ID列表，逗号分隔
+	ProfessionIDs string `form:"profession_ids"`                   // 专业ID列表，逗号分隔
+	ClassIDs      string `form:"class_ids"`                        // 班级ID列表，逗号分隔
+	WithContact   *int   `form:"with_contact"`                     // 1=显示手机、邮箱、性别、状态
+	Page          int    `form:"page"`
+	PageSize      int    `form:"page_size"`
+}

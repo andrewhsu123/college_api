@@ -43,3 +43,13 @@ func (s *OpenPersonService) GetManagePersons(req *model.OpenManagePersonsRequest
 	}
 	return &model.OpenManagePersonsResponse{ManagePersons: items}, nil
 }
+
+// GetStaffByOrg 按组织机构查询政工（OR条件）
+func (s *OpenPersonService) GetStaffByOrg(req *model.OpenStaffByOrgRequest) (*model.OpenStaffResponse, error) {
+	return s.repo.GetStaffByOrg(req)
+}
+
+// GetStudentByOrg 按组织机构查询学生（OR条件）
+func (s *OpenPersonService) GetStudentByOrg(req *model.OpenStudentByOrgRequest) (*model.OpenStudentResponse, error) {
+	return s.repo.GetStudentByOrg(req)
+}

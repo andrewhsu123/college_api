@@ -1095,3 +1095,326 @@ func (r *OpenPersonRepository) GetRoleList(req *model.OpenRoleRequest) ([]model.
 
 	return items, nil
 }
+
+// GetStaffByOrg 按组织机构查询政工（OR条件）
+// SQL: SELECT * FROM staff WHERE university_id = ? AND (department_id IN (?) OR college_id IN (?) OR faculty_id IN (?))
+func (r *OpenPersonRepository) GetStaffByOrg(req *model.OpenStaffByOrgRequest) (*model.OpenStaffResponse, error) {
+	// 设置默认分页
+	if req.Page < 1 {
+		req.Page = 1
+	}
+	if req.PageSize < 1 {
+		req.PageSize = 20
+	}
+	if req.PageSize > 1000 {
+		req.PageSize = 1000
+	}
+
+	// 解析ID列表
+	deptIDs := r.parseIntIDs(req.DepartmentIDs)
+	collegeIDs := r.parseIntIDs(req.CollegeIDs)
+	facultyIDs := r.parseIntIDs(req.FacultyIDs)
+
+	// 至少需要一个组织条件
+	if len(deptIDs) == 0 && len(collegeIDs) == 0 && len(facultyIDs) == 0 {
+		return &model.OpenStaffResponse{
+			Items:    []model.OpenStaffItem{},
+			Total:    0,
+			Page:     req.Page,
+			PageSize: req.PageSize,
+		}, nil
+	}
+
+	// 构建基础查询
+	baseFields := "s.person_id, COALESCE(s.name, '') as name, COALESCE(s.staff_no, '') as staff_no, s.department_id, s.college_id, s.faculty_id"
+	if req.WithContact != nil && *req.WithContact == 1 {
+		baseFields += ", p.mobile, p.email, p.gender, p.status"
+	}
+
+	query := fmt.Sprintf("SELECT %s FROM staff s", baseFields)
+	if req.WithContact != nil && *req.WithContact == 1 {
+		query += " LEFT JOIN persons p ON s.person_id = p.id"
+	}
+	query += " WHERE s.university_id = ?"
+	args := []any{req.UniversityID}
+
+	// 构建OR条件
+	var orConditions []string
+	if len(deptIDs) > 0 {
+		placeholders := make([]string, len(deptIDs))
+		for i, id := range deptIDs {
+			placeholders[i] = "?"
+			args = append(args, id)
+		}
+		orConditions = append(orConditions, fmt.Sprintf("s.department_id IN (%s)", strings.Join(placeholders, ",")))
+	}
+	if len(collegeIDs) > 0 {
+		placeholders := make([]string, len(collegeIDs))
+		for i, id := range collegeIDs {
+			placeholders[i] = "?"
+			args = append(args, id)
+		}
+		orConditions = append(orConditions, fmt.Sprintf("s.college_id IN (%s)", strings.Join(placeholders, ",")))
+	}
+	if len(facultyIDs) > 0 {
+		placeholders := make([]string, len(facultyIDs))
+		for i, id := range facultyIDs {
+			placeholders[i] = "?"
+			args = append(args, id)
+		}
+		orConditions = append(orConditions, fmt.Sprintf("s.faculty_id IN (%s)", strings.Join(placeholders, ",")))
+	}
+
+	query += " AND (" + strings.Join(orConditions, " OR ") + ")"
+
+	// 查询总数
+	countQuery := "SELECT COUNT(*) FROM (" + query + ") AS t"
+	var total int64
+	if err := r.db.QueryRow(countQuery, args...).Scan(&total); err != nil {
+		return nil, fmt.Errorf("count error: %w", err)
+	}
+
+	// 分页
+	query += " ORDER BY s.person_id ASC LIMIT ? OFFSET ?"
+	offset := (req.Page - 1) * req.PageSize
+	args = append(args, req.PageSize, offset)
+
+	rows, err := r.db.Query(query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("query error: %w", err)
+	}
+	defer rows.Close()
+
+	var items []model.OpenStaffItem
+	for rows.Next() {
+		var item model.OpenStaffItem
+		var name, staffNo sql.NullString
+		var deptID, collegeID, facultyID sql.NullInt64
+
+		if req.WithContact != nil && *req.WithContact == 1 {
+			var mobile, email sql.NullString
+			var gender, status sql.NullInt64
+			err = rows.Scan(&item.PersonID, &name, &staffNo, &deptID, &collegeID, &facultyID,
+				&mobile, &email, &gender, &status)
+			if err != nil {
+				return nil, err
+			}
+			if mobile.Valid {
+				item.Mobile = &mobile.String
+			}
+			if email.Valid {
+				item.Email = &email.String
+			}
+			if gender.Valid {
+				g := int(gender.Int64)
+				item.Gender = &g
+			}
+			if status.Valid {
+				s := int(status.Int64)
+				item.Status = &s
+			}
+		} else {
+			err = rows.Scan(&item.PersonID, &name, &staffNo, &deptID, &collegeID, &facultyID)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		item.Name = name.String
+		item.StaffNo = staffNo.String
+		if deptID.Valid {
+			d := int(deptID.Int64)
+			item.DepartmentID = &d
+		}
+		if collegeID.Valid {
+			c := int(collegeID.Int64)
+			item.CollegeID = &c
+		}
+		if facultyID.Valid {
+			f := int(facultyID.Int64)
+			item.FacultyID = &f
+		}
+
+		items = append(items, item)
+	}
+
+	return &model.OpenStaffResponse{
+		Items:    items,
+		Total:    total,
+		Page:     req.Page,
+		PageSize: req.PageSize,
+	}, nil
+}
+
+// GetStudentByOrg 按组织机构查询学生（OR条件）
+// SQL: SELECT * FROM students WHERE university_id = ? AND (college_id IN (?) OR faculty_id IN (?) OR profession_id IN (?) OR class_id IN (?))
+func (r *OpenPersonRepository) GetStudentByOrg(req *model.OpenStudentByOrgRequest) (*model.OpenStudentResponse, error) {
+	// 设置默认分页
+	if req.Page < 1 {
+		req.Page = 1
+	}
+	if req.PageSize < 1 {
+		req.PageSize = 20
+	}
+	if req.PageSize > 1000 {
+		req.PageSize = 1000
+	}
+
+	// 解析ID列表
+	collegeIDs := r.parseIntIDs(req.CollegeIDs)
+	facultyIDs := r.parseIntIDs(req.FacultyIDs)
+	professionIDs := r.parseIntIDs(req.ProfessionIDs)
+	classIDs := r.parseIntIDs(req.ClassIDs)
+
+	// 至少需要一个组织条件
+	if len(collegeIDs) == 0 && len(facultyIDs) == 0 && len(professionIDs) == 0 && len(classIDs) == 0 {
+		return &model.OpenStudentResponse{
+			Items:    []model.OpenStudentItem{},
+			Total:    0,
+			Page:     req.Page,
+			PageSize: req.PageSize,
+		}, nil
+	}
+
+	// 构建基础查询
+	baseFields := `s.person_id, COALESCE(s.name, '') as name, COALESCE(s.student_no, '') as student_no,
+		s.area_id, COALESCE(s.grade, '') as grade, COALESCE(s.education_level, '') as education_level,
+		COALESCE(s.school_system, '') as school_system, COALESCE(s.id_card, '') as id_card,
+		COALESCE(s.admission_no, '') as admission_no, COALESCE(s.exam_no, '') as exam_no,
+		s.enrollment_status, s.is_enrolled, s.college_id, s.faculty_id, s.profession_id, s.class_id`
+	if req.WithContact != nil && *req.WithContact == 1 {
+		baseFields += ", p.mobile, p.email, p.gender, p.status"
+	}
+
+	query := fmt.Sprintf("SELECT %s FROM students s", baseFields)
+	if req.WithContact != nil && *req.WithContact == 1 {
+		query += " LEFT JOIN persons p ON s.person_id = p.id"
+	}
+	query += " WHERE s.university_id = ?"
+	args := []any{req.UniversityID}
+
+	// 构建OR条件
+	var orConditions []string
+	if len(collegeIDs) > 0 {
+		placeholders := make([]string, len(collegeIDs))
+		for i, id := range collegeIDs {
+			placeholders[i] = "?"
+			args = append(args, id)
+		}
+		orConditions = append(orConditions, fmt.Sprintf("s.college_id IN (%s)", strings.Join(placeholders, ",")))
+	}
+	if len(facultyIDs) > 0 {
+		placeholders := make([]string, len(facultyIDs))
+		for i, id := range facultyIDs {
+			placeholders[i] = "?"
+			args = append(args, id)
+		}
+		orConditions = append(orConditions, fmt.Sprintf("s.faculty_id IN (%s)", strings.Join(placeholders, ",")))
+	}
+	if len(professionIDs) > 0 {
+		placeholders := make([]string, len(professionIDs))
+		for i, id := range professionIDs {
+			placeholders[i] = "?"
+			args = append(args, id)
+		}
+		orConditions = append(orConditions, fmt.Sprintf("s.profession_id IN (%s)", strings.Join(placeholders, ",")))
+	}
+	if len(classIDs) > 0 {
+		placeholders := make([]string, len(classIDs))
+		for i, id := range classIDs {
+			placeholders[i] = "?"
+			args = append(args, id)
+		}
+		orConditions = append(orConditions, fmt.Sprintf("s.class_id IN (%s)", strings.Join(placeholders, ",")))
+	}
+
+	query += " AND (" + strings.Join(orConditions, " OR ") + ")"
+
+	// 查询总数
+	countQuery := "SELECT COUNT(*) FROM (" + query + ") AS t"
+	var total int64
+	if err := r.db.QueryRow(countQuery, args...).Scan(&total); err != nil {
+		return nil, fmt.Errorf("count error: %w", err)
+	}
+
+	// 分页
+	query += " ORDER BY s.person_id ASC LIMIT ? OFFSET ?"
+	offset := (req.Page - 1) * req.PageSize
+	args = append(args, req.PageSize, offset)
+
+	rows, err := r.db.Query(query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("query error: %w", err)
+	}
+	defer rows.Close()
+
+	var items []model.OpenStudentItem
+	for rows.Next() {
+		var item model.OpenStudentItem
+		var name, studentNo, grade, educationLevel, schoolSystem, idCard, admissionNo, examNo sql.NullString
+		var areaID, facultyID, classID sql.NullInt64
+
+		if req.WithContact != nil && *req.WithContact == 1 {
+			var mobile, email sql.NullString
+			var gender, status sql.NullInt64
+			err = rows.Scan(&item.PersonID, &name, &studentNo, &areaID, &grade, &educationLevel,
+				&schoolSystem, &idCard, &admissionNo, &examNo, &item.EnrollmentStatus, &item.IsEnrolled,
+				&item.CollegeID, &facultyID, &item.ProfessionID, &classID,
+				&mobile, &email, &gender, &status)
+			if err != nil {
+				return nil, err
+			}
+			if mobile.Valid {
+				item.Mobile = &mobile.String
+			}
+			if email.Valid {
+				item.Email = &email.String
+			}
+			if gender.Valid {
+				g := int(gender.Int64)
+				item.Gender = &g
+			}
+			if status.Valid {
+				s := int(status.Int64)
+				item.Status = &s
+			}
+		} else {
+			err = rows.Scan(&item.PersonID, &name, &studentNo, &areaID, &grade, &educationLevel,
+				&schoolSystem, &idCard, &admissionNo, &examNo, &item.EnrollmentStatus, &item.IsEnrolled,
+				&item.CollegeID, &facultyID, &item.ProfessionID, &classID)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		item.Name = name.String
+		item.StudentNo = studentNo.String
+		item.Grade = grade.String
+		item.EducationLevel = educationLevel.String
+		item.SchoolSystem = schoolSystem.String
+		item.IDCard = idCard.String
+		item.AdmissionNo = admissionNo.String
+		item.ExamNo = examNo.String
+		if areaID.Valid {
+			a := int(areaID.Int64)
+			item.AreaID = &a
+		}
+		if facultyID.Valid {
+			f := int(facultyID.Int64)
+			item.FacultyID = &f
+		}
+		if classID.Valid {
+			c := int(classID.Int64)
+			item.ClassID = &c
+		}
+
+		items = append(items, item)
+	}
+
+	return &model.OpenStudentResponse{
+		Items:    items,
+		Total:    total,
+		Page:     req.Page,
+		PageSize: req.PageSize,
+	}, nil
+}

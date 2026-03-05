@@ -127,6 +127,8 @@ func main() {
 			openGroup.GET("/colleges/list", openCollegeHandler.GetCollegeList)
 			openGroup.GET("/campus-areas/list", openCollegeHandler.GetCampusAreaList)
 			openGroup.GET("/departments/list", openCollegeHandler.GetDepartmentList)
+			openGroup.GET("/staff/by-org", openPersonHandler.GetStaffByOrg)
+			openGroup.GET("/students/by-org", openPersonHandler.GetStudentByOrg)
 		}
 	}
 

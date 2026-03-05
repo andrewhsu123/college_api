@@ -1699,7 +1699,307 @@ Authorization: your_open_key_here</pre>
 
 
             <div class="api-section">
-                <h2 class="api-title">13. 查询角色列表</h2>
+                <h2 class="api-title">13. 按组织机构查询政工（OR条件）</h2>
+                <div>
+                    <span class="method-badge method-get">GET</span>
+                    <span class="endpoint">/api/open/staff/by-org</span>
+                </div>
+                
+                <div class="warning-box">
+                    <strong>与 /api/open/staff/list 的区别：</strong>本接口的组织机构条件为 OR 关系，即满足 department_ids、college_ids、faculty_ids 中任意一个条件即可匹配。适用于查询"属于部门A 或 学院B 或 系C"的政工人员。
+                </div>
+
+                <div class="section-title">请求头</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Authorization</td>
+                            <td>string</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>OPEN_KEY 秘钥</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="section-title">请求参数</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>university_id</td>
+                            <td>int</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>学校ID</td>
+                        </tr>
+                        <tr>
+                            <td>department_ids</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否*</span></td>
+                            <td>部门ID列表（逗号分隔，如：1,2,3）</td>
+                        </tr>
+                        <tr>
+                            <td>college_ids</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否*</span></td>
+                            <td>学院ID列表（逗号分隔，如：4,5）</td>
+                        </tr>
+                        <tr>
+                            <td>faculty_ids</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否*</span></td>
+                            <td>系ID列表（逗号分隔，如：6,7,8）</td>
+                        </tr>
+                        <tr>
+                            <td>with_contact</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>是否显示联系方式：1=显示手机、邮箱、性别、状态</td>
+                        </tr>
+                        <tr>
+                            <td>page</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>页码（默认1）</td>
+                        </tr>
+                        <tr>
+                            <td>page_size</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>每页数量（默认20，最大1000）</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="info-box">
+                    <strong>*注意：</strong>department_ids、college_ids、faculty_ids 三个参数至少需要填写一个。
+                </div>
+
+                <div class="section-title">SQL逻辑</div>
+                <div class="code-block">
+<pre>SELECT * FROM staff 
+WHERE university_id = ? 
+  AND (department_id IN (1,2,3) OR college_id IN (4,5) OR faculty_id IN (6,7,8))</pre>
+                </div>
+
+                <div class="section-title">请求示例</div>
+                <div class="code-block">
+<pre>GET /api/open/staff/by-org?university_id=17&department_ids=4104,4139&college_ids=4106,4108
+Authorization: your_open_key_here</pre>
+                </div>
+
+                <div class="section-title">响应示例</div>
+                <div class="code-block">
+<pre>{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "items": [
+      {
+        "person_id": 33,
+        "name": "斯内普",
+        "staff_no": "0001",
+        "department_id": 4104,
+        "college_id": 4106,
+        "faculty_id": null
+      },
+      {
+        "person_id": 34,
+        "name": "Albus Dumbledore",
+        "staff_no": "0002",
+        "department_id": 4139,
+        "college_id": null,
+        "faculty_id": null
+      }
+    ],
+    "total": 2,
+    "page": 1,
+    "page_size": 20
+  }
+}</pre>
+                </div>
+            </div>
+
+
+            <div class="api-section">
+                <h2 class="api-title">14. 按组织机构查询学生（OR条件）</h2>
+                <div>
+                    <span class="method-badge method-get">GET</span>
+                    <span class="endpoint">/api/open/students/by-org</span>
+                </div>
+                
+                <div class="warning-box">
+                    <strong>与 /api/open/students/list 的区别：</strong>本接口的组织机构条件为 OR 关系，即满足 college_ids、faculty_ids、profession_ids、class_ids 中任意一个条件即可匹配。适用于查询"属于学院A 或 系B 或 专业C 或 班级D"的学生。
+                </div>
+
+                <div class="section-title">请求头</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Authorization</td>
+                            <td>string</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>OPEN_KEY 秘钥</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="section-title">请求参数</div>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>类型</th>
+                            <th>必填</th>
+                            <th>说明</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>university_id</td>
+                            <td>int</td>
+                            <td><span class="param-required">是</span></td>
+                            <td>学校ID</td>
+                        </tr>
+                        <tr>
+                            <td>college_ids</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否*</span></td>
+                            <td>学院ID列表（逗号分隔，如：1,2）</td>
+                        </tr>
+                        <tr>
+                            <td>faculty_ids</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否*</span></td>
+                            <td>系ID列表（逗号分隔，如：3,4）</td>
+                        </tr>
+                        <tr>
+                            <td>profession_ids</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否*</span></td>
+                            <td>专业ID列表（逗号分隔，如：5,6,7）</td>
+                        </tr>
+                        <tr>
+                            <td>class_ids</td>
+                            <td>string</td>
+                            <td><span class="param-optional">否*</span></td>
+                            <td>班级ID列表（逗号分隔，如：8,9）</td>
+                        </tr>
+                        <tr>
+                            <td>with_contact</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>是否显示联系方式：1=显示手机、邮箱、性别、状态</td>
+                        </tr>
+                        <tr>
+                            <td>page</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>页码（默认1）</td>
+                        </tr>
+                        <tr>
+                            <td>page_size</td>
+                            <td>int</td>
+                            <td><span class="param-optional">否</span></td>
+                            <td>每页数量（默认20，最大1000）</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="info-box">
+                    <strong>*注意：</strong>college_ids、faculty_ids、profession_ids、class_ids 四个参数至少需要填写一个。
+                </div>
+
+                <div class="section-title">SQL逻辑</div>
+                <div class="code-block">
+<pre>SELECT * FROM students 
+WHERE university_id = ? 
+  AND (college_id IN (1,2) OR faculty_id IN (3,4) OR profession_id IN (5,6,7) OR class_id IN (8,9))</pre>
+                </div>
+
+                <div class="section-title">请求示例</div>
+                <div class="code-block">
+<pre>GET /api/open/students/by-org?university_id=17&college_ids=4106,4109&profession_ids=4114,4124
+Authorization: your_open_key_here</pre>
+                </div>
+
+                <div class="section-title">响应示例</div>
+                <div class="code-block">
+<pre>{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "items": [
+      {
+        "person_id": 32,
+        "name": "哈利波特大",
+        "student_no": "8989",
+        "area_id": null,
+        "grade": "2025",
+        "education_level": "博士研究生",
+        "school_system": "4",
+        "id_card": "",
+        "admission_no": "",
+        "exam_no": "",
+        "enrollment_status": 1,
+        "is_enrolled": 1,
+        "college_id": 4106,
+        "faculty_id": 4165,
+        "profession_id": 4114,
+        "class_id": 4121
+      },
+      {
+        "person_id": 38,
+        "name": "赫敏",
+        "student_no": "0002",
+        "area_id": null,
+        "grade": "2025",
+        "education_level": "专科",
+        "school_system": "4",
+        "id_card": "",
+        "admission_no": "",
+        "exam_no": "",
+        "enrollment_status": 1,
+        "is_enrolled": 1,
+        "college_id": 4109,
+        "faculty_id": null,
+        "profession_id": 4124,
+        "class_id": 4129
+      }
+    ],
+    "total": 2,
+    "page": 1,
+    "page_size": 20
+  }
+}</pre>
+                </div>
+            </div>
+
+
+            <div class="api-section">
+                <h2 class="api-title">15. 查询角色列表</h2>
                 <div>
                     <span class="method-badge method-get">GET</span>
                     <span class="endpoint">/api/open/roles/list</span>
@@ -1798,7 +2098,7 @@ Authorization: your_open_key_here</pre>
 
 
             <div class="api-section">
-                <h2 class="api-title">14. 查询管辖某人员的管理者</h2>
+                <h2 class="api-title">16. 查询管辖某人员的管理者</h2>
                 <div>
                     <span class="method-badge method-get">GET</span>
                     <span class="endpoint">/api/open/persons/managers</span>
@@ -1981,7 +2281,7 @@ Authorization: your_open_key_here</pre>
 
 
             <div class="api-section">
-                <h2 class="api-title">15. 查询学校列表</h2>
+                <h2 class="api-title">17. 查询学校列表</h2>
                 <div>
                     <span class="method-badge method-get">GET</span>
                     <span class="endpoint">/api/open/colleges/list</span>
@@ -2092,7 +2392,7 @@ Authorization: your_open_key_here</pre>
 
 
             <div class="api-section">
-                <h2 class="api-title">16. 查询校区列表</h2>
+                <h2 class="api-title">18. 查询校区列表</h2>
                 <div>
                     <span class="method-badge method-get">GET</span>
                     <span class="endpoint">/api/open/campus-areas/list</span>
@@ -2166,7 +2466,7 @@ Authorization: your_open_key_here</pre>
 
 
             <div class="api-section">
-                <h2 class="api-title">17. 根据角色查询人员列表</h2>
+                <h2 class="api-title">19. 根据角色查询人员列表</h2>
                 <div>
                     <span class="method-badge method-get">GET</span>
                     <span class="endpoint">/api/open/roles/persons</span>
@@ -2404,7 +2704,7 @@ Authorization: your_open_key_here</pre>
 
 
             <div class="api-section">
-                <h2 class="api-title">18. 查询部门列表</h2>
+                <h2 class="api-title">20. 查询部门列表</h2>
                 <div>
                     <span class="method-badge method-get">GET</span>
                     <span class="endpoint">/api/open/departments/list</span>
