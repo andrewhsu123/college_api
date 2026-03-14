@@ -57,6 +57,8 @@ type PersonInfo interface {
 	SetUniversityName(name string)
 	SetManagedRoles(roles []ManagedRole)
 	SetManagedMenu(menu []int)
+	SetSelfDepartment(deptIDs []int)
+	SetSelfRoles(roleIDs []int)
 }
 
 // StaffPersonInfo 政工/维修工信息（person_type=2,3）
@@ -80,6 +82,8 @@ type StaffPersonInfo struct {
 	FacultyName    *string       `json:"faculty_name"`
 	ManagedRoles   []ManagedRole `json:"managed_roles"`
 	ManagedMenu    []int         `json:"managed_menu"`
+	SelfDepartment []int         `json:"self_department"` // 我的机构列表
+	SelfRoles      []int         `json:"self_roles"`      // 我的角色列表
 }
 
 func (s *StaffPersonInfo) GetPersonID() int                    { return s.PersonID }
@@ -88,6 +92,8 @@ func (s *StaffPersonInfo) GetUniversityID() int                { return s.Univer
 func (s *StaffPersonInfo) SetUniversityName(name string)       { s.UniversityName = name }
 func (s *StaffPersonInfo) SetManagedRoles(roles []ManagedRole) { s.ManagedRoles = roles }
 func (s *StaffPersonInfo) SetManagedMenu(menu []int)           { s.ManagedMenu = menu }
+func (s *StaffPersonInfo) SetSelfDepartment(deptIDs []int)     { s.SelfDepartment = deptIDs }
+func (s *StaffPersonInfo) SetSelfRoles(roleIDs []int)          { s.SelfRoles = roleIDs }
 
 // StudentPersonInfo 学生信息（person_type=1）
 type StudentPersonInfo struct {
@@ -121,6 +127,8 @@ type StudentPersonInfo struct {
 	ClassName        *string       `json:"class_name"`
 	ManagedRoles     []ManagedRole `json:"managed_roles"`
 	ManagedMenu      []int         `json:"managed_menu"`
+	SelfDepartment   []int         `json:"self_department"` // 我的机构列表
+	SelfRoles        []int         `json:"self_roles"`      // 我的角色列表
 }
 
 func (s *StudentPersonInfo) GetPersonID() int                    { return s.PersonID }
@@ -129,6 +137,8 @@ func (s *StudentPersonInfo) GetUniversityID() int                { return s.Univ
 func (s *StudentPersonInfo) SetUniversityName(name string)       { s.UniversityName = name }
 func (s *StudentPersonInfo) SetManagedRoles(roles []ManagedRole) { s.ManagedRoles = roles }
 func (s *StudentPersonInfo) SetManagedMenu(menu []int)           { s.ManagedMenu = menu }
+func (s *StudentPersonInfo) SetSelfDepartment(deptIDs []int)     { s.SelfDepartment = deptIDs }
+func (s *StudentPersonInfo) SetSelfRoles(roleIDs []int)          { s.SelfRoles = roleIDs }
 
 // ManagedRole 管辖角色信息
 type ManagedRole struct {

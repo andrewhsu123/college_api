@@ -46,6 +46,18 @@ func (s *PersonService) GetStaffInfo(personID int) (model.PersonInfo, error) {
 	}
 	info.SetManagedMenu(managedMenu)
 
+	// 获取我的机构列表
+	selfDepartment := s.getSelfDepartment(info)
+	info.SetSelfDepartment(selfDepartment)
+
+	// 获取我的角色列表
+	selfRoles, err := s.deptRepo.GetStaffRoleIDs(info.GetUniversityID(), personID)
+	if err != nil {
+		fmt.Printf("[WARN] Failed to get self roles for person %d: %v\n", personID, err)
+		selfRoles = []int{}
+	}
+	info.SetSelfRoles(selfRoles)
+
 	return info, nil
 }
 
@@ -66,6 +78,41 @@ func (s *PersonService) fillDepartmentNames(info model.PersonInfo) {
 	case *model.StaffPersonInfo:
 		s.fillStaffDepartmentNames(v)
 	}
+}
+
+// getSelfDepartment 获取我的机构列表
+func (s *PersonService) getSelfDepartment(info model.PersonInfo) []int {
+	var deptIDs []int
+
+	switch v := info.(type) {
+	case *model.StaffPersonInfo:
+		// 政工: department_id, college_id, faculty_id
+		if v.DepartmentID != nil && *v.DepartmentID > 0 {
+			deptIDs = append(deptIDs, *v.DepartmentID)
+		}
+		if v.CollegeID != nil && *v.CollegeID > 0 {
+			deptIDs = append(deptIDs, *v.CollegeID)
+		}
+		if v.FacultyID != nil && *v.FacultyID > 0 {
+			deptIDs = append(deptIDs, *v.FacultyID)
+		}
+	case *model.StudentPersonInfo:
+		// 学生: college_id, faculty_id, profession_id, class_id
+		if v.CollegeID != nil && *v.CollegeID > 0 {
+			deptIDs = append(deptIDs, *v.CollegeID)
+		}
+		if v.FacultyID != nil && *v.FacultyID > 0 {
+			deptIDs = append(deptIDs, *v.FacultyID)
+		}
+		if v.ProfessionID != nil && *v.ProfessionID > 0 {
+			deptIDs = append(deptIDs, *v.ProfessionID)
+		}
+		if v.ClassID != nil && *v.ClassID > 0 {
+			deptIDs = append(deptIDs, *v.ClassID)
+		}
+	}
+
+	return deptIDs
 }
 
 // fillStudentDepartmentNames 填充学生机构名称
